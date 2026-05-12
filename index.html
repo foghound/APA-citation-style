@@ -3,263 +3,301 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>APA Citation Builder</title>
+<title>APA Studio</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
 
 <style>
-/* =========================
-BASE
-========================= */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --pink:#E8366A;
-  --green:#3DB87A;
-  --ink:#1C1410;
-  --muted:#7A6A5A;
-  --bg:#FFF8F0;
-  --surface:#fff;
-  --rule:#E8D8C8;
-  --r:10px;
-  --shadow:0 6px 24px rgba(0,0,0,.08);
+  --ink:#1a1412;
+  --muted:#6b5f5a;
+  --bg:#fbf6f2;
+  --card:#ffffff;
+  --line:#e9ddd6;
 
-  --serif:'Playfair Display',serif;
-  --body:'Lora',serif;
+  --accent:#e84d6e;
+  --accent2:#2fbf8f;
+
+  --serif:'Playfair Display', serif;
+  --body:'Lora', serif;
+
+  --r:16px;
+  --shadow:0 12px 40px rgba(0,0,0,.08);
 }
 
+*{box-sizing:border-box}
+
 body{
+  margin:0;
   font-family:var(--body);
   background:var(--bg);
   color:var(--ink);
-  line-height:1.7;
 }
 
-.page{
-  max-width:900px;
+.wrap{
+  max-width:1000px;
   margin:0 auto;
-  padding:24px 16px 80px;
+  padding:40px 18px 120px;
 }
 
-/* =========================
-HEADER
-========================= */
+/* HEADER */
 h1{
   font-family:var(--serif);
-  font-size:2.2rem;
-  margin-bottom:6px;
+  font-size:clamp(2.2rem,5vw,3.6rem);
+  margin:0;
 }
+h1 span{color:var(--accent)}
 
 .sub{
   color:var(--muted);
   font-style:italic;
-  margin-bottom:20px;
+  margin-top:6px;
 }
 
-/* =========================
-LAYOUT
-========================= */
-.card{
-  background:var(--surface);
-  border:1px solid var(--rule);
-  border-radius:var(--r);
-  padding:16px;
-  box-shadow:var(--shadow);
-  margin-bottom:16px;
-}
-
+/* LAYOUT */
 .grid{
   display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
+  grid-template-columns:1.2fr .8fr;
+  gap:18px;
+  margin-top:28px;
 }
 
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+/* INPUTS */
 label{
-  font-size:11px;
+  font-size:.75rem;
   text-transform:uppercase;
-  letter-spacing:.08em;
+  letter-spacing:.12em;
   color:var(--muted);
 }
 
-input,textarea{
+input,textarea,select{
   width:100%;
   padding:10px;
-  border:1px solid var(--rule);
-  border-radius:8px;
-  font-size:16px;
-}
-
-button{
-  padding:10px 14px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
+  border-radius:10px;
+  border:1px solid var(--line);
+  margin-top:6px;
   font-family:var(--body);
 }
 
-.primary{
-  background:var(--pink);
-  color:#fff;
+textarea{min-height:90px}
+
+input:focus,textarea:focus,select:focus{
+  outline:none;
+  border-color:var(--accent);
 }
 
-/* =========================
-OUTPUT
-========================= */
+/* BUTTONS */
+.btn{
+  margin-top:12px;
+  padding:12px 14px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-family:var(--serif);
+  font-weight:600;
+  color:white;
+  background:var(--accent);
+}
+
+.btn.secondary{background:var(--accent2)}
+
 .output{
-  background:#111;
-  color:#fff;
-  padding:14px;
-  border-radius:10px;
   white-space:pre-wrap;
+  background:#1e1715;
+  color:#fff2ea;
+  padding:14px;
+  border-radius:12px;
 }
 
-.small{
-  font-size:13px;
-  color:var(--muted);
+/* TABS */
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
 }
 
-/* =========================
-MOBILE
-========================= */
-@media(max-width:600px){
-  h1{font-size:1.8rem}
-  input,textarea{font-size:16px}
+.tab{
+  border:1px solid var(--line);
+  background:white;
+  padding:10px 14px;
+  border-radius:999px;
+  cursor:pointer;
+}
+
+.tab.active{
+  background:var(--accent);
+  color:white;
+  border-color:var(--accent);
 }
 </style>
 </head>
 
 <body>
-<div class="page">
+<div class="wrap">
 
-<h1>APA Citation Builder</h1>
-<div class="sub">Fast, clean citations with auto-formatting.</div>
+<h1>APA <span>Studio</span></h1>
+<div class="sub">Citation engine + annotated bibliography + export tools</div>
 
-<div class="card">
-
-  <div class="grid">
-
-    <div>
-      <label>Author Last Name</label>
-      <input id="last">
-    </div>
-
-    <div>
-      <label>Author First Name</label>
-      <input id="first">
-    </div>
-
-    <div>
-      <label>Year</label>
-      <input id="year">
-    </div>
-
-    <div>
-      <label>Title</label>
-      <input id="title">
-    </div>
-
-    <div>
-      <label>Source / Journal</label>
-      <input id="source">
-    </div>
-
-    <div>
-      <label>DOI or URL</label>
-      <input id="link">
-    </div>
-
-    <button class="primary" onclick="generate()">Generate</button>
-    <button onclick="copy()">Copy</button>
-
-  </div>
+<div class="tabs">
+  <button class="tab active" onclick="show('cite')">Citations</button>
+  <button class="tab" onclick="show('annot')">Annotated</button>
 </div>
 
+<div class="grid">
+
+<!-- LEFT -->
+<div>
+
+<!-- CITATION -->
+<div class="card panel" id="cite">
+
+  <label>Author</label>
+  <input id="a">
+
+  <label style="margin-top:10px;">Year</label>
+  <input id="y">
+
+  <label style="margin-top:10px;">Title</label>
+  <input id="t">
+
+  <button class="btn" onclick="genCitation()">Generate Citation</button>
+
+  <button class="btn secondary" onclick="exportDoc()">Export DOCX</button>
+  <button class="btn secondary" onclick="exportPDF()">Export PDF</button>
+
+</div>
+
+<!-- ANNOTATED -->
+<div class="card panel" id="annot" style="display:none">
+
+  <label>Citation Fields</label>
+  <input id="aa" placeholder="Author">
+  <input id="ay" placeholder="Year">
+  <input id="at" placeholder="Title">
+
+  <label style="margin-top:10px;">Summary</label>
+  <textarea id="s"></textarea>
+
+  <label>Evaluation</label>
+  <textarea id="e"></textarea>
+
+  <label>Reflection</label>
+  <textarea id="r"></textarea>
+
+  <button class="btn" onclick="genAnnot()">Generate Annotated Entry</button>
+
+</div>
+
+</div>
+
+<!-- RIGHT -->
 <div class="card">
-  <div class="small">Live Output</div>
-  <div id="out" class="output"></div>
+  <label>Output</label>
+  <div class="output" id="out"></div>
+</div>
+
 </div>
 
 </div>
 
 <script>
+let lastText = "";
 
-/* =========================
-CORE HELPERS
-========================= */
+/* SAFE TAB SWITCH */
+function show(id){
+  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+  document.getElementById(id).style.display='block';
 
-function v(id){
-  return document.getElementById(id).value.trim();
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
 }
 
-function formatAuthor(){
-  const l=v('last');
-  const f=v('first');
-  if(!l && !f) return '(Author unknown)';
-  if(!l) return f;
-  if(!f) return l;
-  return `${l}, ${f[0]}.`;
+/* APA ENGINE (core) */
+function citation(a,y,t){
+  a = a || "Author unknown";
+  y = y || "n.d.";
+  t = t || "Untitled";
+  return `${a}. (${y}). ${t}.`;
 }
 
-function cleanDOI(x){
-  if(!x) return '';
-  return x.replace(/^https?:\/\/doi.org\//,'')
-          .replace(/^doi:/i,'')
-          .trim();
+/* CITATION */
+function genCitation(){
+  const txt = citation(
+    document.getElementById('a').value,
+    document.getElementById('y').value,
+    document.getElementById('t').value
+  );
+
+  lastText = txt;
+  document.getElementById('out').textContent = txt;
 }
 
-/* =========================
-APA FORMAT (SIMPLE JOURNAL STYLE)
-========================= */
+/* ANNOTATED */
+function genAnnot(){
+  const base = citation(
+    document.getElementById('aa').value,
+    document.getElementById('ay').value,
+    document.getElementById('at').value
+  );
 
-function generate(){
-  const author = formatAuthor();
-  const year = v('year') || 'n.d.';
-  const title = v('title') || '[No title]';
-  const source = v('source') || '[Source]';
-  let link = cleanDOI(v('link'));
+  const s = document.getElementById('s').value;
+  const e = document.getElementById('e').value;
+  const r = document.getElementById('r').value;
 
-  if(link && !link.startsWith('http')){
-    link = 'https://doi.org/' + link;
-  }
+  const full =
+`${base}
 
-  const citation =
-`${author} (${year}). ${title}. ${source}. ${link}`;
+Summary: ${s}
 
-  document.getElementById('out').textContent = citation;
+Evaluation: ${e}
 
-  localStorage.setItem('lastCitation', citation);
+Reflection: ${r}`;
+
+  lastText = full;
+  document.getElementById('out').textContent = full;
 }
 
-/* =========================
-COPY (iOS SAFE)
-========================= */
+/* DOCX EXPORT */
+function exportDoc(){
+  const { Document, Packer, Paragraph } = window.docx;
 
-async function copy(){
-  const text = document.getElementById('out').textContent;
+  const doc = new Document({
+    sections:[{
+      children:[new Paragraph(lastText || "")]
+    }]
+  });
 
-  try{
-    await navigator.clipboard.writeText(text);
-  }catch(e){
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
+  Packer.toBlob(doc).then(blob=>{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "APA_Export.docx";
+    a.click();
+  });
 }
 
-/* =========================
-AUTO LOAD LAST
-========================= */
-
-window.onload = () => {
-  const last = localStorage.getItem('lastCitation');
-  if(last){
-    document.getElementById('out').textContent = last;
-  }
-};
-
+/* PDF EXPORT (print-safe) */
+function exportPDF(){
+  const w = window.open("");
+  w.document.write(`<pre style="font-size:14px;font-family:serif;white-space:pre-wrap">${lastText}</pre>`);
+  w.print();
+}
 </script>
+
 </body>
 </html>
