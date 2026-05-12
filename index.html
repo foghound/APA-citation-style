@@ -1,1096 +1,359 @@
-<!DOCTYPE html>
+<!-- =========================================
+FINAL INTEGRATED UPGRADES
+Add these into your existing project
+========================================= -->
 
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>APA Citation Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 <style>
-  /* ── Reset & tokens ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-–ink:       #1a1714;
-–paper:     #f5f0e8;
-–warm:      #ede7d9;
-–rule:      #c8bfad;
-–accent:    #8b2e00;
-–accent2:   #c0622a;
-–muted:     #6b6052;
-–copy-bg:   #2a2420;
-–serif:     ‘Playfair Display’, Georgia, serif;
-–sans:      ‘IBM Plex Sans’, system-ui, sans-serif;
-–mono:      ‘IBM Plex Mono’, ‘Courier New’, monospace;
-–r:         4px;
+/* =========================================
+APA HANGING INDENTS
+========================================= */
+
+.citation-box,
+.history-text,
+.annot-history-citation,
+.annot-output-box{
+  padding-left:2em;
+  text-indent:-2em;
 }
 
-html { scroll-behavior: smooth; }
+/* =========================================
+FOCUS STATES
+========================================= */
 
-body {
-background: var(–paper);
-color: var(–ink);
-font-family: var(–sans);
-font-weight: 300;
-font-size: 15px;
-line-height: 1.6;
-min-height: 100vh;
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible{
+  outline:3px solid var(--pink);
+  outline-offset:2px;
 }
 
-/* ── Grain overlay ── */
-body::before {
-content: ‘’;
-position: fixed;
-inset: 0;
-pointer-events: none;
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘200’ height=‘200’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘200’ height=‘200’ filter=‘url(%23n)’ opacity=‘0.04’/%3E%3C/svg%3E”);
-z-index: 9999;
+/* =========================================
+EXPORT BUTTON
+========================================= */
+
+.export-btn{
+  font-family:var(--body);
+  font-size:12px;
+  font-style:italic;
+
+  padding:6px 16px;
+
+  border:2px solid var(--rule);
+
+  background:var(--surface);
+
+  color:var(--muted);
+
+  border-radius:99px;
+
+  cursor:pointer;
+
+  transition:all .15s;
 }
 
-/* ── Layout ── */
-.page {
-max-width: 860px;
-margin: 0 auto;
-padding: 48px 24px 80px;
+.export-btn:hover{
+  border-color:var(--odyssey);
+  color:var(--odyssey);
 }
 
-/* ── Header ── */
-header {
-border-bottom: 2px solid var(–ink);
-padding-bottom: 20px;
-margin-bottom: 40px;
-animation: fadeDown .5s ease both;
+/* =========================================
+LIVE PREVIEW TRANSITION
+========================================= */
+
+.output-wrap,
+.annot-output-wrap{
+  transition:opacity .18s ease;
 }
 
-.header-eyebrow {
-font-family: var(–mono);
-font-size: 11px;
-letter-spacing: .18em;
-text-transform: uppercase;
-color: var(–accent);
-margin-bottom: 6px;
-}
-
-header h1 {
-font-family: var(–serif);
-font-size: clamp(2rem, 5vw, 3.4rem);
-font-weight: 700;
-line-height: 1.1;
-letter-spacing: -.01em;
-}
-
-header h1 em {
-font-style: italic;
-color: var(–accent);
-}
-
-.header-sub {
-margin-top: 8px;
-color: var(–muted);
-font-size: 13px;
-font-family: var(–mono);
-}
-
-/* ── Media type selector ── */
-.type-grid {
-display: flex;
-flex-wrap: wrap;
-gap: 8px;
-margin-bottom: 36px;
-animation: fadeUp .5s .1s ease both;
-}
-
-.type-btn {
-font-family: var(–mono);
-font-size: 11.5px;
-letter-spacing: .04em;
-padding: 7px 14px;
-border: 1.5px solid var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-transition: all .18s;
-white-space: nowrap;
-}
-
-.type-btn:hover { border-color: var(–accent2); color: var(–accent2); }
-
-.type-btn.active {
-background: var(–accent);
-border-color: var(–accent);
-color: #fff;
-font-weight: 500;
-}
-
-/* ── Form card ── */
-.form-card {
-background: var(–warm);
-border: 1.5px solid var(–rule);
-border-radius: var(–r);
-padding: 32px;
-margin-bottom: 32px;
-animation: fadeUp .4s .15s ease both;
-}
-
-.section-label {
-font-family: var(–mono);
-font-size: 10.5px;
-letter-spacing: .14em;
-text-transform: uppercase;
-color: var(–accent);
-margin-bottom: 14px;
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.section-label::after {
-content: ‘’;
-flex: 1;
-height: 1px;
-background: var(–rule);
-}
-
-/* Author rows */
-.author-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-
-.author-row {
-display: grid;
-grid-template-columns: 1fr 1fr 28px;
-gap: 8px;
-align-items: center;
-animation: fadeUp .2s ease both;
-}
-
-.author-row.editor-row { grid-template-columns: 1fr 1fr 28px; }
-
-.remove-btn {
-width: 28px; height: 28px;
-border: 1.5px solid var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-font-size: 16px;
-line-height: 1;
-transition: all .15s;
-display: flex; align-items: center; justify-content: center;
-}
-.remove-btn:hover { border-color: var(–accent); color: var(–accent); }
-
-.add-btn {
-font-family: var(–mono);
-font-size: 11px;
-letter-spacing: .06em;
-padding: 5px 12px;
-border: 1.5px dashed var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-transition: all .15s;
-}
-.add-btn:hover { border-color: var(–accent2); color: var(–accent2); }
-
-/* Fields */
-.field-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-gap: 14px;
-margin-bottom: 14px;
-}
-
-.field { display: flex; flex-direction: column; gap: 5px; }
-
-.field label {
-font-family: var(–mono);
-font-size: 10.5px;
-letter-spacing: .1em;
-text-transform: uppercase;
-color: var(–muted);
-}
-
-.field input {
-font-family: var(–sans);
-font-size: 14px;
-padding: 8px 10px;
-border: 1.5px solid var(–rule);
-border-radius: var(–r);
-background: var(–paper);
-color: var(–ink);
-outline: none;
-transition: border-color .15s;
-width: 100%;
-}
-.field input:focus { border-color: var(–accent); }
-.field input::placeholder { color: #b0a898; }
-
-.field.full { grid-column: 1 / -1; }
-
-hr.divider { border: none; border-top: 1px solid var(–rule); margin: 20px 0; }
-
-/* Generate button */
-.generate-btn {
-font-family: var(–mono);
-font-size: 13px;
-font-weight: 500;
-letter-spacing: .08em;
-padding: 13px 32px;
-background: var(–accent);
-color: #fff;
-border: none;
-border-radius: var(–r);
-cursor: pointer;
-transition: background .18s, transform .1s;
-width: 100%;
-margin-top: 8px;
-}
-.generate-btn:hover { background: var(–accent2); }
-.generate-btn:active { transform: scale(.98); }
-
-/* ── Output ── */
-.output-wrap {
-display: none;
-animation: fadeUp .3s ease both;
-margin-bottom: 32px;
-}
-.output-wrap.visible { display: block; }
-
-.output-header {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-bottom: 10px;
-}
-
-.output-label {
-font-family: var(–mono);
-font-size: 10.5px;
-letter-spacing: .14em;
-text-transform: uppercase;
-color: var(–accent);
-}
-
-.copy-btn {
-font-family: var(–mono);
-font-size: 11px;
-letter-spacing: .06em;
-padding: 5px 14px;
-border: 1.5px solid var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-transition: all .15s;
-}
-.copy-btn:hover { border-color: var(–accent); color: var(–accent); }
-.copy-btn.copied { background: var(–accent); border-color: var(–accent); color: #fff; }
-
-.citation-box {
-background: var(–copy-bg);
-color: #e8dfd2;
-font-family: var(–serif);
-font-size: 15.5px;
-line-height: 1.8;
-padding: 24px 28px;
-border-radius: var(–r);
-border-left: 3px solid var(–accent);
-white-space: pre-wrap;
-word-break: break-word;
-}
-
-.citation-box em { font-style: italic; color: #f0c08a; }
-
-/* ── History ── */
-.history-section { animation: fadeUp .4s .2s ease both; }
-
-.history-header {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-bottom: 14px;
-}
-
-.history-title {
-font-family: var(–serif);
-font-size: 1.1rem;
-font-weight: 700;
-}
-
-.clear-btn {
-font-family: var(–mono);
-font-size: 10.5px;
-letter-spacing: .08em;
-padding: 4px 10px;
-border: 1.5px solid var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-transition: all .15s;
-}
-.clear-btn:hover { border-color: var(–accent); color: var(–accent); }
-
-.history-list { display: flex; flex-direction: column; gap: 10px; }
-
-.history-item {
-background: var(–warm);
-border: 1px solid var(–rule);
-border-radius: var(–r);
-padding: 14px 18px;
-display: grid;
-grid-template-columns: 1fr auto;
-gap: 12px;
-align-items: start;
-animation: fadeUp .2s ease both;
-}
-
-.history-type {
-font-family: var(–mono);
-font-size: 10px;
-letter-spacing: .12em;
-text-transform: uppercase;
-color: var(–accent2);
-margin-bottom: 4px;
-}
-
-.history-text {
-font-family: var(–serif);
-font-size: 14px;
-line-height: 1.65;
-color: var(–ink);
-word-break: break-word;
-}
-
-.history-text em { font-style: italic; }
-
-.history-copy {
-font-family: var(–mono);
-font-size: 10px;
-padding: 4px 10px;
-border: 1px solid var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-white-space: nowrap;
-transition: all .15s;
-flex-shrink: 0;
-}
-.history-copy:hover { border-color: var(–accent); color: var(–accent); }
-
-.empty-history {
-font-family: var(–mono);
-font-size: 12px;
-color: var(–muted);
-text-align: center;
-padding: 24px 0;
-border: 1.5px dashed var(–rule);
-border-radius: var(–r);
-}
-
-/* ── Null rules panel ── */
-.rules-toggle {
-font-family: var(–mono);
-font-size: 11px;
-letter-spacing: .06em;
-padding: 6px 14px;
-border: 1.5px solid var(–rule);
-background: transparent;
-color: var(–muted);
-border-radius: 2px;
-cursor: pointer;
-transition: all .15s;
-margin-bottom: 12px;
-}
-.rules-toggle:hover { border-color: var(–accent); color: var(–accent); }
-
-.rules-panel {
-display: none;
-background: var(–warm);
-border: 1px solid var(–rule);
-border-radius: var(–r);
-padding: 20px 24px;
-margin-bottom: 32px;
-animation: fadeUp .2s ease both;
-}
-.rules-panel.open { display: block; }
-
-.rules-panel h3 {
-font-family: var(–serif);
-font-size: 1rem;
-margin-bottom: 12px;
-}
-
-.rules-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.rules-table th {
-font-family: var(–mono);
-font-size: 10px;
-letter-spacing: .12em;
-text-transform: uppercase;
-color: var(–muted);
-text-align: left;
-padding: 4px 8px 8px;
-border-bottom: 1px solid var(–rule);
-}
-.rules-table td { padding: 6px 8px; border-bottom: 1px solid #ddd6c8; vertical-align: top; }
-.rules-table tr:last-child td { border-bottom: none; }
-.rules-table td:first-child { font-family: var(–mono); font-size: 12px; color: var(–accent2); }
-
-/* ── Animations ── */
-@keyframes fadeDown {
-from { opacity: 0; transform: translateY(-12px); }
-to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeUp {
-from { opacity: 0; transform: translateY(10px); }
-to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Responsive ── */
-@media (max-width: 560px) {
-.form-card { padding: 20px 16px; }
-.field-grid { grid-template-columns: 1fr; }
-.author-row { grid-template-columns: 1fr 1fr 28px; }
-header h1 { font-size: 2rem; }
-}
 </style>
 
-</head>
-<body>
-<div class="page">
-
-  <!-- Header -->
-
-  <header>
-    <div class="header-eyebrow">7th Edition</div>
-    <h1>APA <em>Citation</em> Builder</h1>
-    <div class="header-sub">Fill in what you have — missing fields are handled automatically.</div>
-  </header>
-
-  <!-- Null rules toggle -->
-
-<button class="rules-toggle" onclick="toggleRules()">▸ View null-handling rules</button>
-
-  <div class="rules-panel" id="rulesPanel">
-    <h3>Null-Handling Rules</h3>
-    <table class="rules-table">
-      <thead><tr><th>Missing field</th><th>Fallback behaviour</th></tr></thead>
-      <tbody>
-        <tr><td>Authors</td><td>Falls back to editor(s) with (Ed.)/(Eds.), or <em>(Author unknown)</em></td></tr>
-        <tr><td>Year</td><td>Replaced with <em>n.d.</em> (no date)</td></tr>
-        <tr><td>Title</td><td>Replaced with <em>[No title]</em></td></tr>
-        <tr><td>Journal / Magazine / Newspaper</td><td>Replaced with <em>[Source unknown]</em></td></tr>
-        <tr><td>Publisher</td><td>Replaced with <em>[Publisher unknown]</em></td></tr>
-        <tr><td>DOI / URL</td><td>Omitted silently</td></tr>
-        <tr><td>Volume / Issue / Pages</td><td>Omitted silently</td></tr>
-        <tr><td>Location / City</td><td>Omitted silently (APA 7 no longer requires it)</td></tr>
-        <tr><td>Partial author name</td><td>Uses whatever is present (last name only, etc.)</td></tr>
-        <tr><td>21+ authors</td><td>Lists first 19, then … last author (APA ellipsis rule)</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Media type selector -->
-
-  <div class="type-grid" id="typeGrid"></div>
-
-  <!-- Dynamic form -->
-
-  <div class="form-card" id="formCard"></div>
-
-  <!-- Output -->
-
-  <div class="output-wrap" id="outputWrap">
-    <div class="output-header">
-      <span class="output-label">Generated Citation</span>
-      <button class="copy-btn" id="copyBtn" onclick="copyCitation()">Copy</button>
-    </div>
-    <div class="citation-box" id="citationBox"></div>
-  </div>
-
-  <!-- History -->
-
-  <div class="history-section">
-    <div class="history-header">
-      <span class="history-title">Citation History</span>
-      <button class="clear-btn" onclick="clearHistory()">Clear all</button>
-    </div>
-    <div class="history-list" id="historyList"></div>
-  </div>
-
-</div>
-
 <script>
-// ════════════════════════════════════════════════════════════
-// APA 7 CITATION ENGINE (ported from Python)
-// ════════════════════════════════════════════════════════════
 
-function clean(v) {
-  if (v == null) return null;
-  const s = String(v).trim();
-  return s || null;
+/* =========================================
+DOI CLEANUP
+========================================= */
+
+function cleanDOI(v){
+
+  if(!v)return null;
+
+  return v
+    .trim()
+    .replace(/^https?:\/\/doi\.org\//i,'')
+    .replace(/^doi:\s*/i,'')
+    .replace(/\s+/g,'');
 }
 
-function formatAuthorName(last, first) {
-  last = clean(last); first = clean(first);
-  if (last && first) {
-    const initials = first.split(/[\s\-]+/).filter(Boolean).map(p => p[0].toUpperCase()).join('. ') + '.';
-    return `${last}, ${initials}`;
+/* =========================================
+REPLACE doi()
+========================================= */
+
+function doi(d,u){
+
+  d=cleanDOI(d);
+
+  u=clean(u);
+
+  if(d){
+    return `https://doi.org/${d}`;
   }
-  return last || first || null;
+
+  return u;
 }
 
-function formatAuthorList(authors) {
-  const fmt = authors.map(a => formatAuthorName(a.last, a.first)).filter(Boolean);
-  if (!fmt.length) return '(Author unknown)';
-  if (fmt.length === 1) return fmt[0];
-  if (fmt.length <= 20) return fmt.slice(0, -1).join(', ') + ', & ' + fmt[fmt.length - 1];
-  return fmt.slice(0, 19).join(', ') + ', \u2026 ' + fmt[fmt.length - 1];
-}
+/* =========================================
+AUTO-SAVE DRAFTS
+========================================= */
 
-function formatEditors(eds) {
-  const fmt = eds.map(e => formatAuthorName(e.last, e.first)).filter(Boolean);
-  if (!fmt.length) return '(Author unknown)';
-  const suf = fmt.length === 1 ? '(Ed.)' : '(Eds.)';
-  if (fmt.length === 1) return `${fmt[0]} ${suf}`;
-  return fmt.slice(0, -1).join(', ') + ', & ' + fmt[fmt.length - 1] + ` ${suf}`;
-}
+function saveDraft(){
 
-function yearStr(year) {
-  return `(${clean(year) || 'n.d.'}).`;
-}
+  try{
 
-function doiUrl(doi, url) {
-  doi = clean(doi); url = clean(url);
-  if (doi) {
-    doi = doi.replace(/^https?:\/\/doi\.org\//i, '').replace(/^doi:/i, '');
-    return `https://doi.org/${doi}`;
+    localStorage.setItem(
+      'apa_draft',
+      JSON.stringify({
+        type:currentType,
+        data:collectData('a_',currentType)
+      })
+    );
+
+  }catch(err){
+    console.error(err);
   }
-  return url;
 }
 
-// Marks a string for italic rendering later
-function ital(text, fallback = '[No title]') {
-  const t = clean(text) || fallback;
-  return `__ITAL__${t}__ITAL__`;
-}
+function loadDraft(){
 
-function sentenceCase(text, fallback = '[No title]') {
-  let t = clean(text) || fallback;
-  return t.charAt(0).toUpperCase() + t.slice(1);
-}
+  try{
 
-// ── Citation builders ──────────────────────────────────────
+    const raw=
+      localStorage.getItem('apa_draft');
 
-function citeJournalArticle({ authors, year, title, journal, volume, issue, pages, doi, url }) {
-  const j = clean(journal) || '[Source unknown]';
-  const vol = clean(volume), iss = clean(issue), pg = clean(pages);
-  let source = ital(j, j.startsWith('[') ? j : j);
-  if (vol) { source += `, ${ital(vol)}`; if (iss) source += `(${iss})`; }
-  if (pg) source += `, ${pg}`;
-  source += '.';
-  const parts = [formatAuthorList(authors), yearStr(year), sentenceCase(title) + '.', source];
-  const link = doiUrl(doi, url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+    if(!raw)return;
 
-function citeBook({ authors, year, title, edition, publisher, doi, url, editors }) {
-  const authorStr = authors && authors.length ? formatAuthorList(authors)
-                  : editors && editors.length ? formatEditors(editors)
-                  : '(Author unknown)';
-  const ed = clean(edition);
-  let titleStr = ital(title);
-  if (ed) titleStr += ` (${ed} ed.)`;
-  titleStr += '.';
-  const pub = clean(publisher) || '[Publisher unknown]';
-  const parts = [authorStr, yearStr(year), titleStr, pub + '.'];
-  const link = doiUrl(doi, url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+    const draft=JSON.parse(raw);
 
-function citeBookChapter({ authors, year, chapter_title, editors, book_title, pages, publisher, doi, url }) {
-  const edStr = editors && editors.length ? formatEditors(editors) : '(Ed. unknown) (Ed.)';
-  const pg = clean(pages);
-  let inStr = `In ${edStr}, ${ital(book_title)}`;
-  if (pg) inStr += ` (pp. ${pg})`;
-  inStr += '.';
-  const pub = clean(publisher) || '[Publisher unknown]';
-  const parts = [formatAuthorList(authors), yearStr(year), sentenceCase(chapter_title) + '.', inStr, pub + '.'];
-  const link = doiUrl(doi, url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+    if(!draft)return;
 
-function citeWebsite({ authors, year, title, site_name, url, retrieval_date }) {
-  const parts = [formatAuthorList(authors), yearStr(year), ital(title) + '.'];
-  const site = clean(site_name);
-  if (site) parts.push(site + '.');
-  const link = clean(url);
-  if (link) {
-    parts.push(retrieval_date ? `Retrieved ${retrieval_date}, from ${link}` : link);
-  } else {
-    parts.push('[URL unavailable]');
+    if(draft.type){
+
+      currentType=draft.type;
+
+      buildTypeGrid(
+        'typeGrid',
+        ()=>currentType,
+        (id)=>{
+          currentType=id;
+
+          renderForm(
+            'formCard',
+            currentType,
+            'a_'
+          );
+
+          document
+            .getElementById('outputWrap')
+            .classList.remove('visible');
+        }
+      );
+
+      renderForm(
+        'formCard',
+        currentType,
+        'a_'
+      );
+    }
+
+    if(draft.data){
+
+      setTimeout(()=>{
+
+        const data=draft.data;
+
+        if(data.authors){
+
+          const list=
+            document.getElementById('a_aList');
+
+          if(list){
+
+            list.innerHTML='';
+
+            data.authors.forEach(a=>{
+
+              addRow('a_aList');
+
+              const rows=
+                list.querySelectorAll('.author-row');
+
+              const row=rows[rows.length-1];
+
+              row.querySelector('.al').value=
+                a.last || '';
+
+              row.querySelector('.af').value=
+                a.first || '';
+            });
+          }
+        }
+
+        Object.entries(data).forEach(([k,v])=>{
+
+          const el=
+            document.getElementById(`a_f_${k}`);
+
+          if(el && typeof v==='string'){
+            el.value=v;
+          }
+        });
+
+      },50);
+    }
+
+  }catch(err){
+    console.error(err);
   }
-  return parts.join(' ');
 }
 
-function citeNewspaper({ authors, year, month_day, title, newspaper, url }) {
-  const yr = clean(year) || 'n.d.', md = clean(month_day);
-  const dateStr = md ? `(${yr}, ${md}).` : `(${yr}).`;
-  const paper = clean(newspaper) || '[Source unknown]';
-  const parts = [formatAuthorList(authors), dateStr, sentenceCase(title) + '.', ital(paper) + '.'];
-  const link = clean(url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+/* =========================================
+AUTO-COPY AFTER GENERATE
+========================================= */
 
-function citeReport({ authors, year, title, report_number, institution, doi, url }) {
-  const rn = clean(report_number);
-  let titleStr = ital(title);
-  if (rn) titleStr += ` (Report No. ${rn})`;
-  titleStr += '.';
-  const inst = clean(institution) || '[Publisher unknown]';
-  const parts = [formatAuthorList(authors), yearStr(year), titleStr, inst + '.'];
-  const link = doiUrl(doi, url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+const oldGenerate=generate;
 
-function citePodcastEpisode({ host, year, month_day, episode_title, series_title, producer, url }) {
-  const yr = clean(year) || 'n.d.', md = clean(month_day);
-  const dateStr = md ? `(${yr}, ${md}).` : `(${yr}).`;
-  const parts = [formatAuthorList(host), dateStr, sentenceCase(episode_title) + ' [Audio podcast episode].'];
-  const series = clean(series_title);
-  if (series) parts.push(`In ${ital(series)}.`);
-  const prod = clean(producer);
-  if (prod) parts.push(prod + '.');
-  const link = clean(url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+generate=async function(){
 
-function citeVideo({ authors, year, month_day, title, site_name, url }) {
-  const yr = clean(year) || 'n.d.', md = clean(month_day);
-  const dateStr = md ? `(${yr}, ${md}).` : `(${yr}).`;
-  const parts = [formatAuthorList(authors), dateStr, ital(title) + ' [Video].'];
-  const site = clean(site_name);
-  if (site) parts.push(site + '.');
-  const link = clean(url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+  oldGenerate();
 
-function citeDissertation({ authors, year, title, degree_type, institution, database, url }) {
-  const degree = clean(degree_type) || 'Doctoral dissertation';
-  const inst = clean(institution) || '[Institution unknown]';
-  const titleStr = ital(title) + ` [${degree}, ${inst}].`;
-  const parts = [formatAuthorList(authors), yearStr(year), titleStr];
-  const db = clean(database);
-  if (db) parts.push(db + '.');
-  const link = clean(url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+  await copyText(plain(lastRaw));
 
-function citeConferencePaper({ authors, year, month_day, title, conference, location, doi, url }) {
-  const yr = clean(year) || 'n.d.', md = clean(month_day);
-  const dateStr = md ? `(${yr}, ${md}).` : `(${yr}).`;
-  const conf = clean(conference) || '[Conference unknown]';
-  const loc = clean(location);
-  const confStr = loc ? `${conf}, ${loc}.` : `${conf}.`;
-  const parts = [formatAuthorList(authors), dateStr, sentenceCase(title) + ' [Conference paper].', confStr];
-  const link = doiUrl(doi, url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+  const btn=document.getElementById('copyBtn');
 
-function citeMagazineArticle({ authors, year, month_day, title, magazine, volume, issue, pages, url }) {
-  const yr = clean(year) || 'n.d.', md = clean(month_day);
-  const dateStr = md ? `(${yr}, ${md}).` : `(${yr}).`;
-  const mag = clean(magazine) || '[Source unknown]';
-  const vol = clean(volume), iss = clean(issue), pg = clean(pages);
-  let source = ital(mag);
-  if (vol) { source += `, ${ital(vol)}`; if (iss) source += `(${iss})`; }
-  if (pg) source += `, ${pg}`;
-  source += '.';
-  const parts = [formatAuthorList(authors), dateStr, sentenceCase(title) + '.', source];
-  const link = clean(url);
-  if (link) parts.push(link);
-  return parts.join(' ');
-}
+  btn.textContent='Copied!';
+  btn.classList.add('copied');
 
-// ════════════════════════════════════════════════════════════
-// FORM SCHEMA
-// ════════════════════════════════════════════════════════════
+  setTimeout(()=>{
 
-const TYPES = [
-  { id: 'journal_article',  label: 'Journal Article' },
-  { id: 'book',             label: 'Book' },
-  { id: 'book_chapter',     label: 'Book Chapter' },
-  { id: 'website',          label: 'Website' },
-  { id: 'newspaper',        label: 'Newspaper' },
-  { id: 'report',           label: 'Report' },
-  { id: 'podcast_episode',  label: 'Podcast' },
-  { id: 'video',            label: 'Video / YouTube' },
-  { id: 'dissertation',     label: 'Dissertation / Thesis' },
-  { id: 'conference_paper', label: 'Conference Paper' },
-  { id: 'magazine_article', label: 'Magazine' },
-];
+    btn.textContent='Copy';
 
-// Each schema entry: { key, label, placeholder, span? }
-const SCHEMAS = {
-  journal_article: {
-    authors: true,
-    fields: [
-      { key:'year',    label:'Year',         placeholder:'e.g. 2023' },
-      { key:'title',   label:'Article Title',placeholder:'Sentence case title', span:'full' },
-      { key:'journal', label:'Journal Name', placeholder:'Journal of ...' },
-      { key:'volume',  label:'Volume',       placeholder:'e.g. 107' },
-      { key:'issue',   label:'Issue',        placeholder:'e.g. 3' },
-      { key:'pages',   label:'Pages',        placeholder:'e.g. 45–67' },
-      { key:'doi',     label:'DOI',          placeholder:'10.xxxx/...' },
-      { key:'url',     label:'URL (if no DOI)', placeholder:'https://...' },
-    ],
-    fn: d => citeJournalArticle({ authors: d.authors, year: d.year, title: d.title,
-      journal: d.journal, volume: d.volume, issue: d.issue, pages: d.pages, doi: d.doi, url: d.url }),
-  },
-  book: {
-    authors: true,
-    editors: true,
-    fields: [
-      { key:'year',      label:'Year',      placeholder:'e.g. 2020' },
-      { key:'title',     label:'Book Title',placeholder:'Italicized title', span:'full' },
-      { key:'edition',   label:'Edition',   placeholder:'e.g. 2nd' },
-      { key:'publisher', label:'Publisher', placeholder:'Publisher name' },
-      { key:'doi',       label:'DOI',       placeholder:'10.xxxx/...' },
-      { key:'url',       label:'URL',       placeholder:'https://...' },
-    ],
-    fn: d => citeBook({ authors: d.authors, year: d.year, title: d.title,
-      edition: d.edition, publisher: d.publisher, doi: d.doi, url: d.url, editors: d.editors }),
-  },
-  book_chapter: {
-    authors: true,
-    editors: true,
-    fields: [
-      { key:'year',          label:'Year',          placeholder:'e.g. 2019' },
-      { key:'chapter_title', label:'Chapter Title', placeholder:'Sentence case', span:'full' },
-      { key:'book_title',    label:'Book Title',    placeholder:'Italicized', span:'full' },
-      { key:'pages',         label:'Pages',         placeholder:'e.g. 112–134' },
-      { key:'publisher',     label:'Publisher',     placeholder:'Publisher name' },
-      { key:'doi',           label:'DOI',           placeholder:'10.xxxx/...' },
-      { key:'url',           label:'URL',           placeholder:'https://...' },
-    ],
-    fn: d => citeBookChapter({ authors: d.authors, year: d.year, chapter_title: d.chapter_title,
-      editors: d.editors, book_title: d.book_title, pages: d.pages, publisher: d.publisher, doi: d.doi, url: d.url }),
-  },
-  website: {
-    authors: true,
-    fields: [
-      { key:'year',           label:'Year',           placeholder:'e.g. 2023 or n.d.' },
-      { key:'title',          label:'Page Title',     placeholder:'Page title', span:'full' },
-      { key:'site_name',      label:'Site Name',      placeholder:'e.g. NASA, BBC' },
-      { key:'url',            label:'URL',            placeholder:'https://...', span:'full' },
-      { key:'retrieval_date', label:'Retrieval Date', placeholder:'e.g. May 12, 2026 (only if content changes)' },
-    ],
-    fn: d => citeWebsite({ authors: d.authors, year: d.year, title: d.title,
-      site_name: d.site_name, url: d.url, retrieval_date: d.retrieval_date }),
-  },
-  newspaper: {
-    authors: true,
-    fields: [
-      { key:'year',      label:'Year',        placeholder:'e.g. 2023' },
-      { key:'month_day', label:'Month & Day', placeholder:'e.g. March 15' },
-      { key:'title',     label:'Article Title', placeholder:'Sentence case', span:'full' },
-      { key:'newspaper', label:'Newspaper',   placeholder:'The New York Times' },
-      { key:'url',       label:'URL',         placeholder:'https://...' },
-    ],
-    fn: d => citeNewspaper({ authors: d.authors, year: d.year, month_day: d.month_day,
-      title: d.title, newspaper: d.newspaper, url: d.url }),
-  },
-  report: {
-    authors: true,
-    fields: [
-      { key:'year',          label:'Year',          placeholder:'e.g. 2021' },
-      { key:'title',         label:'Report Title',  placeholder:'Italicized', span:'full' },
-      { key:'report_number', label:'Report Number', placeholder:'e.g. 123' },
-      { key:'institution',   label:'Institution',   placeholder:'e.g. WHO' },
-      { key:'doi',           label:'DOI',           placeholder:'10.xxxx/...' },
-      { key:'url',           label:'URL',           placeholder:'https://...' },
-    ],
-    fn: d => citeReport({ authors: d.authors, year: d.year, title: d.title,
-      report_number: d.report_number, institution: d.institution, doi: d.doi, url: d.url }),
-  },
-  podcast_episode: {
-    host: true,
-    fields: [
-      { key:'year',         label:'Year',           placeholder:'e.g. 2023' },
-      { key:'month_day',    label:'Month & Day',    placeholder:'e.g. June 4' },
-      { key:'episode_title',label:'Episode Title',  placeholder:'Sentence case', span:'full' },
-      { key:'series_title', label:'Series / Show',  placeholder:'Show name', span:'full' },
-      { key:'producer',     label:'Producer',       placeholder:'e.g. TED Audio Collective' },
-      { key:'url',          label:'URL',            placeholder:'https://...' },
-    ],
-    fn: d => citePodcastEpisode({ host: d.host, year: d.year, month_day: d.month_day,
-      episode_title: d.episode_title, series_title: d.series_title, producer: d.producer, url: d.url }),
-  },
-  video: {
-    authors: true,
-    fields: [
-      { key:'year',      label:'Year',        placeholder:'e.g. 2022' },
-      { key:'month_day', label:'Month & Day', placeholder:'e.g. April 3' },
-      { key:'title',     label:'Video Title', placeholder:'Italicized', span:'full' },
-      { key:'site_name', label:'Platform',    placeholder:'e.g. YouTube, Vimeo' },
-      { key:'url',       label:'URL',         placeholder:'https://...' },
-    ],
-    fn: d => citeVideo({ authors: d.authors, year: d.year, month_day: d.month_day,
-      title: d.title, site_name: d.site_name, url: d.url }),
-  },
-  dissertation: {
-    authors: true,
-    fields: [
-      { key:'year',        label:'Year',           placeholder:'e.g. 2021' },
-      { key:'title',       label:'Title',          placeholder:'Dissertation title', span:'full' },
-      { key:'degree_type', label:'Degree Type',    placeholder:'e.g. Doctoral dissertation' },
-      { key:'institution', label:'Institution',    placeholder:'e.g. Stanford University' },
-      { key:'database',    label:'Database',       placeholder:'e.g. ProQuest', span:'full' },
-      { key:'url',         label:'URL',            placeholder:'https://...' },
-    ],
-    fn: d => citeDissertation({ authors: d.authors, year: d.year, title: d.title,
-      degree_type: d.degree_type, institution: d.institution, database: d.database, url: d.url }),
-  },
-  conference_paper: {
-    authors: true,
-    fields: [
-      { key:'year',       label:'Year',        placeholder:'e.g. 2022' },
-      { key:'month_day',  label:'Dates',       placeholder:'e.g. Sept 12–15' },
-      { key:'title',      label:'Paper Title', placeholder:'Sentence case', span:'full' },
-      { key:'conference', label:'Conference',  placeholder:'Proceedings of ...', span:'full' },
-      { key:'location',   label:'Location',    placeholder:'e.g. Dublin, Ireland' },
-      { key:'doi',        label:'DOI',         placeholder:'10.xxxx/...' },
-      { key:'url',        label:'URL',         placeholder:'https://...' },
-    ],
-    fn: d => citeConferencePaper({ authors: d.authors, year: d.year, month_day: d.month_day,
-      title: d.title, conference: d.conference, location: d.location, doi: d.doi, url: d.url }),
-  },
-  magazine_article: {
-    authors: true,
-    fields: [
-      { key:'year',      label:'Year',            placeholder:'e.g. 2023' },
-      { key:'month_day', label:'Month',           placeholder:'e.g. April' },
-      { key:'title',     label:'Article Title',   placeholder:'Sentence case', span:'full' },
-      { key:'magazine',  label:'Magazine',        placeholder:'e.g. Wired' },
-      { key:'volume',    label:'Volume',          placeholder:'e.g. 31' },
-      { key:'issue',     label:'Issue',           placeholder:'e.g. 4' },
-      { key:'pages',     label:'Pages',           placeholder:'e.g. 54–61' },
-      { key:'url',       label:'URL',             placeholder:'https://...' },
-    ],
-    fn: d => citeMagazineArticle({ authors: d.authors, year: d.year, month_day: d.month_day,
-      title: d.title, magazine: d.magazine, volume: d.volume, issue: d.issue, pages: d.pages, url: d.url }),
-  },
+    btn.classList.remove('copied');
+
+  },2000);
+
+  saveDraft();
 };
 
-// ════════════════════════════════════════════════════════════
-// UI STATE
-// ════════════════════════════════════════════════════════════
+/* =========================================
+LIVE PREVIEW
+========================================= */
 
-let currentType = 'journal_article';
-let history = [];
-let lastCitation = '';
+function updateLivePreview(){
 
-// ── Render type buttons ──────────────────────────────────
+  try{
 
-function renderTypeGrid() {
-  const grid = document.getElementById('typeGrid');
-  grid.innerHTML = TYPES.map(t =>
-    `<button class="type-btn${t.id === currentType ? ' active' : ''}" onclick="selectType('${t.id}')">${t.label}</button>`
-  ).join('');
-}
+    const data=
+      collectData('a_',currentType);
 
-function selectType(id) {
-  currentType = id;
-  renderTypeGrid();
-  renderForm();
-  document.getElementById('outputWrap').classList.remove('visible');
-}
+    const raw=
+      SCHEMAS[currentType].fn(data);
 
-// ── Render form ──────────────────────────────────────────
+    lastRaw=raw;
 
-function renderForm() {
-  const schema = SCHEMAS[currentType];
-  const card = document.getElementById('formCard');
-  let html = '';
+    const output=
+      document.getElementById('outputWrap');
 
-  // Authors section
-  if (schema.authors) {
-    html += `<div class="section-label">Authors</div>
-    <div class="author-list" id="authorList"></div>
-    <button class="add-btn" onclick="addAuthorRow('authorList', 'authors')">+ Add author</button>
-    <hr class="divider" />`;
+    document.getElementById('citationBox').innerHTML=
+      renderI(raw);
+
+    if(raw.trim()){
+      output.classList.add('visible');
+    }
+
+  }catch(err){
+    console.error(err);
   }
-
-  // Host section (podcast)
-  if (schema.host) {
-    html += `<div class="section-label">Host(s)</div>
-    <div class="author-list" id="hostList"></div>
-    <button class="add-btn" onclick="addAuthorRow('hostList', 'host')">+ Add host</button>
-    <hr class="divider" />`;
-  }
-
-  // Editors section
-  if (schema.editors) {
-    html += `<div class="section-label">Editors <span style="font-weight:300;font-style:italic;font-family:var(--sans)">(optional)</span></div>
-    <div class="author-list" id="editorList"></div>
-    <button class="add-btn" onclick="addAuthorRow('editorList', 'editors')">+ Add editor</button>
-    <hr class="divider" />`;
-  }
-
-  // Regular fields
-  html += `<div class="section-label">Details</div><div class="field-grid">`;
-  for (const f of schema.fields) {
-    html += `<div class="field${f.span === 'full' ? ' full' : ''}">
-      <label>${f.label}</label>
-      <input type="text" id="field_${f.key}" placeholder="${f.placeholder}" />
-    </div>`;
-  }
-  html += `</div>`;
-
-  html += `<button class="generate-btn" onclick="generate()">Generate Citation</button>`;
-
-  card.innerHTML = html;
-
-  // Seed one author row
-  if (schema.authors) addAuthorRow('authorList', 'authors');
-  if (schema.host)    addAuthorRow('hostList', 'host');
 }
 
-function addAuthorRow(listId, role) {
-  const list = document.getElementById(listId);
-  const idx = list.children.length;
-  const div = document.createElement('div');
-  div.className = 'author-row';
-  div.dataset.role = role;
-  div.innerHTML = `
-    <input type="text" placeholder="Last name" class="author-last" style="padding:8px 10px;border:1.5px solid var(--rule);border-radius:var(--r);font-family:var(--sans);font-size:14px;background:var(--paper);color:var(--ink);outline:none;width:100%;" />
-    <input type="text" placeholder="First name(s)" class="author-first" style="padding:8px 10px;border:1.5px solid var(--rule);border-radius:var(--r);font-family:var(--sans);font-size:14px;background:var(--paper);color:var(--ink);outline:none;width:100%;" />
-    <button class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
-  list.appendChild(div);
+/* =========================================
+EXPORT BIBLIOGRAPHY
+========================================= */
+
+function exportBibliography(){
+
+  if(!citHistory.length)return;
+
+  const txt=
+    citHistory
+      .map(c=>plain(c.raw))
+      .join('\n\n');
+
+  const blob=
+    new Blob(
+      [txt],
+      {type:'text/plain'}
+    );
+
+  const a=document.createElement('a');
+
+  a.href=
+    URL.createObjectURL(blob);
+
+  a.download='bibliography.txt';
+
+  a.click();
+
+  URL.revokeObjectURL(a.href);
 }
 
-function collectAuthors(listId) {
-  const list = document.getElementById(listId);
-  if (!list) return [];
-  return Array.from(list.querySelectorAll('.author-row')).map(row => ({
-    last:  row.querySelector('.author-last').value.trim() || null,
-    first: row.querySelector('.author-first').value.trim() || null,
-  })).filter(a => a.last || a.first);
+/* =========================================
+ADD EXPORT BUTTON TO UI
+========================================= */
+
+function injectExportButton(){
+
+  const controls=
+    document.querySelector('.history-controls');
+
+  if(!controls)return;
+
+  if(document.getElementById('exportBtn'))return;
+
+  const btn=document.createElement('button');
+
+  btn.id='exportBtn';
+
+  btn.className='export-btn';
+
+  btn.textContent='Export bibliography';
+
+  btn.onclick=exportBibliography;
+
+  controls.appendChild(btn);
 }
 
-function getFieldValue(key) {
-  const el = document.getElementById('field_' + key);
-  return el ? el.value.trim() || null : null;
-}
+/* =========================================
+LIVE EVENTS
+========================================= */
 
-// ── Generate ─────────────────────────────────────────────
+document.addEventListener('input',e=>{
 
-function generate() {
-  const schema = SCHEMAS[currentType];
-  const data = {};
+  saveDraft();
 
-  if (schema.authors) data.authors = collectAuthors('authorList');
-  if (schema.host)    data.host    = collectAuthors('hostList');
-  if (schema.editors) data.editors = collectAuthors('editorList');
+  updateLivePreview();
+});
 
-  for (const f of schema.fields) data[f.key] = getFieldValue(f.key);
+/* =========================================
+INITIALIZE
+========================================= */
 
-  const raw = schema.fn(data);
-  lastCitation = raw;
+window.addEventListener('DOMContentLoaded',()=>{
 
-  // Render to DOM (convert __ITAL__ markers to <em>)
-  const box = document.getElementById('citationBox');
-  box.innerHTML = renderItalics(raw);
+  injectExportButton();
 
-  document.getElementById('outputWrap').classList.add('visible');
-  document.getElementById('outputWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  loadDraft();
 
-  // Add to history
-  const typeLabel = TYPES.find(t => t.id === currentType)?.label || currentType;
-  history.unshift({ type: typeLabel, raw, rendered: renderItalics(raw) });
-  if (history.length > 30) history.pop();
-  renderHistory();
+  updateLivePreview();
+});
 
-  // Reset copy button
-  const btn = document.getElementById('copyBtn');
-  btn.textContent = 'Copy';
-  btn.classList.remove('copied');
-}
-
-// Convert __ITAL__text__ITAL__ → <em>text</em>
-function renderItalics(str) {
-  return str.replace(/__ITAL__(.*?)__ITAL__/g, '<em>$1</em>');
-}
-
-// Plain text version (strip markers)
-function plainText(str) {
-  return str.replace(/__ITAL__(.*?)__ITAL__/g, '$1');
-}
-
-// ── Copy ─────────────────────────────────────────────────
-
-function copyCitation() {
-  navigator.clipboard.writeText(plainText(lastCitation)).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
-}
-
-function copyHistoryItem(raw) {
-  navigator.clipboard.writeText(plainText(raw));
-}
-
-// ── History ──────────────────────────────────────────────
-
-function renderHistory() {
-  const list = document.getElementById('historyList');
-  if (!history.length) {
-    list.innerHTML = '<div class="empty-history">No citations yet — generate one above.</div>';
-    return;
-  }
-  list.innerHTML = history.map((item, i) => `
-    <div class="history-item">
-      <div>
-        <div class="history-type">${item.type}</div>
-        <div class="history-text">${item.rendered}</div>
-      </div>
-      <button class="history-copy" onclick="copyHistoryItem(history[${i}].raw)">Copy</button>
-    </div>`).join('');
-}
-
-function clearHistory() {
-  history = [];
-  renderHistory();
-}
-
-// ── Rules panel ──────────────────────────────────────────
-
-function toggleRules() {
-  const panel = document.getElementById('rulesPanel');
-  const btn = document.querySelector('.rules-toggle');
-  const open = panel.classList.toggle('open');
-  btn.textContent = (open ? '▾' : '▸') + ' View null-handling rules';
-}
-
-// ── Init ─────────────────────────────────────────────────
-
-renderTypeGrid();
-renderForm();
-renderHistory();
 </script>
-
-</body>
-</html>
