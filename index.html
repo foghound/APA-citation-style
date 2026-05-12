@@ -1,359 +1,265 @@
-<!-- =========================================
-FINAL INTEGRATED UPGRADES
-Add these into your existing project
-========================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>APA Citation Builder</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500&display=swap" rel="stylesheet"/>
 
 <style>
+/* =========================
+BASE
+========================= */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* =========================================
-APA HANGING INDENTS
-========================================= */
+:root{
+  --pink:#E8366A;
+  --green:#3DB87A;
+  --ink:#1C1410;
+  --muted:#7A6A5A;
+  --bg:#FFF8F0;
+  --surface:#fff;
+  --rule:#E8D8C8;
+  --r:10px;
+  --shadow:0 6px 24px rgba(0,0,0,.08);
 
-.citation-box,
-.history-text,
-.annot-history-citation,
-.annot-output-box{
-  padding-left:2em;
-  text-indent:-2em;
+  --serif:'Playfair Display',serif;
+  --body:'Lora',serif;
 }
 
-/* =========================================
-FOCUS STATES
-========================================= */
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible{
-  outline:3px solid var(--pink);
-  outline-offset:2px;
-}
-
-/* =========================================
-EXPORT BUTTON
-========================================= */
-
-.export-btn{
+body{
   font-family:var(--body);
-  font-size:12px;
-  font-style:italic;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.7;
+}
 
-  padding:6px 16px;
+.page{
+  max-width:900px;
+  margin:0 auto;
+  padding:24px 16px 80px;
+}
 
-  border:2px solid var(--rule);
+/* =========================
+HEADER
+========================= */
+h1{
+  font-family:var(--serif);
+  font-size:2.2rem;
+  margin-bottom:6px;
+}
 
-  background:var(--surface);
-
+.sub{
   color:var(--muted);
+  font-style:italic;
+  margin-bottom:20px;
+}
 
-  border-radius:99px;
+/* =========================
+LAYOUT
+========================= */
+.card{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  padding:16px;
+  box-shadow:var(--shadow);
+  margin-bottom:16px;
+}
 
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+
+input,textarea{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--rule);
+  border-radius:8px;
+  font-size:16px;
+}
+
+button{
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
   cursor:pointer;
-
-  transition:all .15s;
+  font-family:var(--body);
 }
 
-.export-btn:hover{
-  border-color:var(--odyssey);
-  color:var(--odyssey);
+.primary{
+  background:var(--pink);
+  color:#fff;
 }
 
-/* =========================================
-LIVE PREVIEW TRANSITION
-========================================= */
-
-.output-wrap,
-.annot-output-wrap{
-  transition:opacity .18s ease;
+/* =========================
+OUTPUT
+========================= */
+.output{
+  background:#111;
+  color:#fff;
+  padding:14px;
+  border-radius:10px;
+  white-space:pre-wrap;
 }
 
+.small{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* =========================
+MOBILE
+========================= */
+@media(max-width:600px){
+  h1{font-size:1.8rem}
+  input,textarea{font-size:16px}
+}
 </style>
+</head>
+
+<body>
+<div class="page">
+
+<h1>APA Citation Builder</h1>
+<div class="sub">Fast, clean citations with auto-formatting.</div>
+
+<div class="card">
+
+  <div class="grid">
+
+    <div>
+      <label>Author Last Name</label>
+      <input id="last">
+    </div>
+
+    <div>
+      <label>Author First Name</label>
+      <input id="first">
+    </div>
+
+    <div>
+      <label>Year</label>
+      <input id="year">
+    </div>
+
+    <div>
+      <label>Title</label>
+      <input id="title">
+    </div>
+
+    <div>
+      <label>Source / Journal</label>
+      <input id="source">
+    </div>
+
+    <div>
+      <label>DOI or URL</label>
+      <input id="link">
+    </div>
+
+    <button class="primary" onclick="generate()">Generate</button>
+    <button onclick="copy()">Copy</button>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="small">Live Output</div>
+  <div id="out" class="output"></div>
+</div>
+
+</div>
 
 <script>
 
-/* =========================================
-DOI CLEANUP
-========================================= */
+/* =========================
+CORE HELPERS
+========================= */
 
-function cleanDOI(v){
-
-  if(!v)return null;
-
-  return v
-    .trim()
-    .replace(/^https?:\/\/doi\.org\//i,'')
-    .replace(/^doi:\s*/i,'')
-    .replace(/\s+/g,'');
+function v(id){
+  return document.getElementById(id).value.trim();
 }
 
-/* =========================================
-REPLACE doi()
-========================================= */
+function formatAuthor(){
+  const l=v('last');
+  const f=v('first');
+  if(!l && !f) return '(Author unknown)';
+  if(!l) return f;
+  if(!f) return l;
+  return `${l}, ${f[0]}.`;
+}
 
-function doi(d,u){
+function cleanDOI(x){
+  if(!x) return '';
+  return x.replace(/^https?:\/\/doi.org\//,'')
+          .replace(/^doi:/i,'')
+          .trim();
+}
 
-  d=cleanDOI(d);
+/* =========================
+APA FORMAT (SIMPLE JOURNAL STYLE)
+========================= */
 
-  u=clean(u);
+function generate(){
+  const author = formatAuthor();
+  const year = v('year') || 'n.d.';
+  const title = v('title') || '[No title]';
+  const source = v('source') || '[Source]';
+  let link = cleanDOI(v('link'));
 
-  if(d){
-    return `https://doi.org/${d}`;
+  if(link && !link.startsWith('http')){
+    link = 'https://doi.org/' + link;
   }
 
-  return u;
+  const citation =
+`${author} (${year}). ${title}. ${source}. ${link}`;
+
+  document.getElementById('out').textContent = citation;
+
+  localStorage.setItem('lastCitation', citation);
 }
 
-/* =========================================
-AUTO-SAVE DRAFTS
-========================================= */
+/* =========================
+COPY (iOS SAFE)
+========================= */
 
-function saveDraft(){
+async function copy(){
+  const text = document.getElementById('out').textContent;
 
   try{
-
-    localStorage.setItem(
-      'apa_draft',
-      JSON.stringify({
-        type:currentType,
-        data:collectData('a_',currentType)
-      })
-    );
-
-  }catch(err){
-    console.error(err);
+    await navigator.clipboard.writeText(text);
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
   }
 }
 
-function loadDraft(){
+/* =========================
+AUTO LOAD LAST
+========================= */
 
-  try{
-
-    const raw=
-      localStorage.getItem('apa_draft');
-
-    if(!raw)return;
-
-    const draft=JSON.parse(raw);
-
-    if(!draft)return;
-
-    if(draft.type){
-
-      currentType=draft.type;
-
-      buildTypeGrid(
-        'typeGrid',
-        ()=>currentType,
-        (id)=>{
-          currentType=id;
-
-          renderForm(
-            'formCard',
-            currentType,
-            'a_'
-          );
-
-          document
-            .getElementById('outputWrap')
-            .classList.remove('visible');
-        }
-      );
-
-      renderForm(
-        'formCard',
-        currentType,
-        'a_'
-      );
-    }
-
-    if(draft.data){
-
-      setTimeout(()=>{
-
-        const data=draft.data;
-
-        if(data.authors){
-
-          const list=
-            document.getElementById('a_aList');
-
-          if(list){
-
-            list.innerHTML='';
-
-            data.authors.forEach(a=>{
-
-              addRow('a_aList');
-
-              const rows=
-                list.querySelectorAll('.author-row');
-
-              const row=rows[rows.length-1];
-
-              row.querySelector('.al').value=
-                a.last || '';
-
-              row.querySelector('.af').value=
-                a.first || '';
-            });
-          }
-        }
-
-        Object.entries(data).forEach(([k,v])=>{
-
-          const el=
-            document.getElementById(`a_f_${k}`);
-
-          if(el && typeof v==='string'){
-            el.value=v;
-          }
-        });
-
-      },50);
-    }
-
-  }catch(err){
-    console.error(err);
+window.onload = () => {
+  const last = localStorage.getItem('lastCitation');
+  if(last){
+    document.getElementById('out').textContent = last;
   }
-}
-
-/* =========================================
-AUTO-COPY AFTER GENERATE
-========================================= */
-
-const oldGenerate=generate;
-
-generate=async function(){
-
-  oldGenerate();
-
-  await copyText(plain(lastRaw));
-
-  const btn=document.getElementById('copyBtn');
-
-  btn.textContent='Copied!';
-  btn.classList.add('copied');
-
-  setTimeout(()=>{
-
-    btn.textContent='Copy';
-
-    btn.classList.remove('copied');
-
-  },2000);
-
-  saveDraft();
 };
 
-/* =========================================
-LIVE PREVIEW
-========================================= */
-
-function updateLivePreview(){
-
-  try{
-
-    const data=
-      collectData('a_',currentType);
-
-    const raw=
-      SCHEMAS[currentType].fn(data);
-
-    lastRaw=raw;
-
-    const output=
-      document.getElementById('outputWrap');
-
-    document.getElementById('citationBox').innerHTML=
-      renderI(raw);
-
-    if(raw.trim()){
-      output.classList.add('visible');
-    }
-
-  }catch(err){
-    console.error(err);
-  }
-}
-
-/* =========================================
-EXPORT BIBLIOGRAPHY
-========================================= */
-
-function exportBibliography(){
-
-  if(!citHistory.length)return;
-
-  const txt=
-    citHistory
-      .map(c=>plain(c.raw))
-      .join('\n\n');
-
-  const blob=
-    new Blob(
-      [txt],
-      {type:'text/plain'}
-    );
-
-  const a=document.createElement('a');
-
-  a.href=
-    URL.createObjectURL(blob);
-
-  a.download='bibliography.txt';
-
-  a.click();
-
-  URL.revokeObjectURL(a.href);
-}
-
-/* =========================================
-ADD EXPORT BUTTON TO UI
-========================================= */
-
-function injectExportButton(){
-
-  const controls=
-    document.querySelector('.history-controls');
-
-  if(!controls)return;
-
-  if(document.getElementById('exportBtn'))return;
-
-  const btn=document.createElement('button');
-
-  btn.id='exportBtn';
-
-  btn.className='export-btn';
-
-  btn.textContent='Export bibliography';
-
-  btn.onclick=exportBibliography;
-
-  controls.appendChild(btn);
-}
-
-/* =========================================
-LIVE EVENTS
-========================================= */
-
-document.addEventListener('input',e=>{
-
-  saveDraft();
-
-  updateLivePreview();
-});
-
-/* =========================================
-INITIALIZE
-========================================= */
-
-window.addEventListener('DOMContentLoaded',()=>{
-
-  injectExportButton();
-
-  loadDraft();
-
-  updateLivePreview();
-});
-
 </script>
+</body>
+</html>
