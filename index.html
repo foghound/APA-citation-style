@@ -1037,8 +1037,8 @@ const b = document.getElementById(‘copyBtn’);
 b.textContent = ‘Copy’; b.classList.remove(‘copied’);
 }
 
-const renderI = s => s.replace(/**I**(.*?)**I**/g, ‘<em>$1</em>’);
-const plain   = s => s.replace(/**I**(.*?)**I**/g, ‘$1’);
+const renderI = s => s.replace(/_I_(.*?)_I_/g, ‘<em>$1</em>’);
+const plain   = s => s.replace(/_I_(.*?)_I_/g, ‘$1’);
 
 function copyCitation() {
 navigator.clipboard.writeText(plain(lastRaw)).then(() => {
