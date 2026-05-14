@@ -1,302 +1,1153 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>APA Studio</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
-
+<title>APA Citation Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
 <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
 :root{
-  --ink:#1a1412;
-  --muted:#6b5f5a;
-  --bg:#fbf6f2;
-  --card:#ffffff;
-  --line:#e9ddd6;
+–bg:       #FFF8F2;
+–surface:  #FFFFFF;
+–ink:      #1C1410;
+–muted:    #7A6A5A;
+–rule:     #F0DDD0;
 
-  --accent:#e84d6e;
-  --accent2:#2fbf8f;
+–pink:     #F2366A;
+–pink-lt:  #FEE8EF;
+–pink-dk:  #B01E4A;
+–green:    #2EBF78;
+–green-lt: #E0F8EE;
+–green-dk: #1A7A4A;
+–yellow:   #F7D44C;
+–coral:    #E86559;
+–teal:     #3BBFB0;
+–lavender: #A78BFA;
+–butter:   #F4D892;
 
-  --serif:'Playfair Display', serif;
-  --body:'Lora', serif;
-
-  --r:16px;
-  --shadow:0 12px 40px rgba(0,0,0,.08);
+–serif: ‘Playfair Display’, Georgia, serif;
+–body:  ‘Lora’, Georgia, serif;
+–r:     8px;
+–r-lg:  14px;
+–shadow: 0 4px 28px rgba(28,20,16,.07);
 }
 
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:var(--body);
-  background:var(--bg);
-  color:var(--ink);
+html { scroll-behavior: smooth; }
+body {
+background: var(–bg);
+color: var(–ink);
+font-family: var(–body);
+font-size: 15px;
+line-height: 1.7;
+min-height: 100vh;
 }
 
-.wrap{
-  max-width:1000px;
-  margin:0 auto;
-  padding:40px 18px 120px;
+/* Soft dot-grid background */
+body::before {
+content: ‘’;
+position: fixed; inset: 0;
+pointer-events: none; z-index: 0;
+background-image:
+radial-gradient(circle, #F2336A20 1.5px, transparent 1.5px),
+radial-gradient(circle, #2EBF7820 1.5px, transparent 1.5px),
+radial-gradient(circle, #A78BFA18 1.5px, transparent 1.5px);
+background-size: 44px 44px, 68px 68px, 56px 56px;
+background-position: 0 0, 22px 22px, 11px 34px;
 }
 
-/* HEADER */
-h1{
-  font-family:var(--serif);
-  font-size:clamp(2.2rem,5vw,3.6rem);
-  margin:0;
-}
-h1 span{color:var(--accent)}
-
-.sub{
-  color:var(--muted);
-  font-style:italic;
-  margin-top:6px;
+.page {
+position: relative; z-index: 1;
+max-width: 900px;
+margin: 0 auto;
+padding: 52px 24px 100px;
 }
 
-/* LAYOUT */
-.grid{
-  display:grid;
-  grid-template-columns:1.2fr .8fr;
-  gap:18px;
-  margin-top:28px;
+/* ── Header ── */
+header { margin-bottom: 42px; animation: fadeDown .5s ease both; }
+
+.header-pill {
+display: inline-block;
+font-family: var(–body);
+font-size: 11px; font-style: italic;
+letter-spacing: .1em;
+background: var(–pink); color: #fff;
+padding: 4px 14px; border-radius: 99px;
+margin-bottom: 12px;
 }
 
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr}
+header h1 {
+font-family: var(–serif);
+font-size: clamp(2.4rem, 6vw, 4rem);
+font-weight: 900; line-height: 1.05;
+letter-spacing: -.02em; color: var(–ink);
+}
+header h1 em   { font-style: italic; font-weight: 700; color: var(–pink); }
+header h1 span { color: var(–green-dk); }
+.header-sub {
+margin-top: 10px;
+font-family: var(–body); font-style: italic;
+color: var(–muted); font-size: 14px;
 }
 
-/* CARD */
-.card{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:var(--r);
-  padding:18px;
-  box-shadow:var(--shadow);
+/* ── Main tabs ── */
+.tab-bar {
+display: flex; gap: 4px;
+margin-bottom: 34px;
+background: var(–surface);
+border: 2px solid var(–rule);
+border-radius: var(–r-lg);
+padding: 4px; width: fit-content;
+animation: fadeUp .4s .05s ease both;
+}
+.tab {
+font-family: var(–body); font-size: 13px; font-weight: 500;
+padding: 9px 22px; border: none; border-radius: 10px;
+background: transparent; color: var(–muted);
+cursor: pointer; transition: all .18s; white-space: nowrap;
+}
+.tab:hover { color: var(–pink); }
+.tab.active { background: var(–pink); color: #fff; box-shadow: 0 3px 12px #F2366A44; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeUp .3s ease both; }
+
+/* ── Media type chips ── */
+.type-grid {
+display: flex; flex-wrap: wrap; gap: 7px;
+margin-bottom: 24px;
+}
+.type-btn {
+font-family: var(–body); font-size: 12.5px; font-style: italic;
+padding: 7px 16px;
+border: 2px solid var(–rule); background: var(–surface); color: var(–muted);
+border-radius: 99px; cursor: pointer; transition: all .18s; white-space: nowrap;
+}
+.type-btn:hover  { border-color: var(–pink); color: var(–pink); }
+.type-btn.active { background: var(–pink); border-color: var(–pink); color: #fff; box-shadow: 0 2px 10px #F2366A44; }
+
+/* ── Form card ── */
+.form-card {
+background: var(–surface);
+border: 2px solid var(–rule);
+border-radius: var(–r-lg);
+padding: 32px; margin-bottom: 24px;
+box-shadow: var(–shadow);
+animation: fadeUp .4s .15s ease both;
 }
 
-/* INPUTS */
-label{
-  font-size:.75rem;
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  color:var(--muted);
+.section-label {
+font-family: var(–serif); font-size: 11px; font-weight: 700;
+letter-spacing: .14em; text-transform: uppercase; color: var(–green-dk);
+margin-bottom: 12px;
+display: flex; align-items: center; gap: 8px;
+}
+.section-label::after {
+content: ‘’; flex: 1; height: 2px;
+background: var(–green-lt); border-radius: 2px;
 }
 
-input,textarea,select{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  margin-top:6px;
-  font-family:var(--body);
+.author-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.author-row {
+display: grid; grid-template-columns: 1fr 1fr 32px;
+gap: 8px; align-items: center;
+animation: fadeUp .2s ease both;
 }
 
-textarea{min-height:90px}
+.remove-btn {
+width: 32px; height: 32px;
+border: 2px solid var(–rule); background: transparent;
+color: var(–muted); border-radius: 8px; cursor: pointer;
+font-size: 17px; transition: all .15s;
+display: flex; align-items: center; justify-content: center;
+}
+.remove-btn:hover { border-color: var(–coral); color: var(–coral); background: #fff0f0; }
 
-input:focus,textarea:focus,select:focus{
-  outline:none;
-  border-color:var(--accent);
+.add-btn {
+font-family: var(–body); font-size: 12px; font-style: italic;
+padding: 6px 14px;
+border: 2px dashed var(–rule); background: transparent;
+color: var(–muted); border-radius: 8px; cursor: pointer; transition: all .15s;
+}
+.add-btn:hover { border-color: var(–green); color: var(–green-dk); background: var(–green-lt); }
+
+.field-grid {
+display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+gap: 14px; margin-bottom: 16px;
+}
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+font-family: var(–serif); font-size: 10px; font-weight: 700;
+letter-spacing: .14em; text-transform: uppercase; color: var(–muted);
+}
+.field input {
+font-family: var(–body); font-size: 14px;
+padding: 9px 12px;
+border: 2px solid var(–rule); border-radius: var(–r);
+background: var(–bg); color: var(–ink);
+outline: none; transition: border-color .15s, box-shadow .15s; width: 100%;
+}
+.field input:focus { border-color: var(–pink); box-shadow: 0 0 0 3px #F2366A14; }
+.field input::placeholder { color: #C8B8A8; }
+.field.full { grid-column: 1 / -1; }
+
+hr.divider { border: none; border-top: 2px solid var(–rule); margin: 20px 0; }
+
+.generate-btn {
+font-family: var(–serif); font-size: 14px; font-weight: 700; letter-spacing: .05em;
+padding: 14px 32px;
+background: linear-gradient(135deg, var(–pink) 0%, var(–pink-dk) 100%);
+color: #fff; border: none; border-radius: var(–r);
+cursor: pointer; transition: opacity .18s, transform .1s;
+width: 100%; margin-top: 10px;
+box-shadow: 0 4px 20px #F2366A44;
+}
+.generate-btn:hover  { opacity: .9; }
+.generate-btn:active { transform: scale(.98); }
+
+/* ── Output ── */
+.output-wrap { display: none; animation: fadeUp .3s ease both; margin-bottom: 26px; }
+.output-wrap.visible { display: block; }
+
+.output-header {
+display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.output-label {
+font-family: var(–serif); font-size: 11px; font-weight: 700;
+letter-spacing: .14em; text-transform: uppercase; color: var(–green-dk);
+}
+.copy-btn {
+font-family: var(–body); font-size: 12px; font-style: italic;
+padding: 6px 16px;
+border: 2px solid var(–rule); background: var(–surface);
+color: var(–muted); border-radius: 99px; cursor: pointer; transition: all .15s;
+}
+.copy-btn:hover  { border-color: var(–green); color: var(–green-dk); }
+.copy-btn.copied { background: var(–green); border-color: var(–green); color: #fff; }
+
+.citation-box {
+background: var(–ink); color: #FFF4E8;
+font-family: var(–body); font-size: 15.5px; line-height: 1.9;
+padding: 24px 28px; border-radius: var(–r-lg);
+border-left: 4px solid var(–pink);
+white-space: pre-wrap; word-break: break-word;
+box-shadow: 0 8px 32px rgba(28,20,16,.15);
+}
+.citation-box em { font-style: italic; color: var(–butter); }
+
+/* ── History ── */
+.section-title {
+font-family: var(–serif); font-size: 1.5rem; font-weight: 700;
+margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.badge {
+display: inline-flex; align-items: center; justify-content: center;
+width: 26px; height: 26px;
+background: var(–pink); color: #fff;
+border-radius: 99px; font-family: var(–body); font-size: 11px; font-weight: 500;
 }
 
-/* BUTTONS */
-.btn{
-  margin-top:12px;
-  padding:12px 14px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  font-family:var(--serif);
-  font-weight:600;
-  color:white;
-  background:var(--accent);
+.history-controls { display: flex; gap: 8px; margin-bottom: 14px; }
+.ghost-btn {
+font-family: var(–body); font-size: 12px; font-style: italic;
+padding: 6px 14px;
+border: 2px solid var(–rule); background: var(–surface);
+color: var(–muted); border-radius: 99px; cursor: pointer; transition: all .15s;
+}
+.ghost-btn:hover { border-color: var(–coral); color: var(–coral); }
+
+.history-list { display: flex; flex-direction: column; gap: 10px; }
+.history-item {
+background: var(–surface); border: 2px solid var(–rule);
+border-radius: var(–r-lg); padding: 16px 18px;
+display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start;
+animation: fadeUp .2s ease both; transition: border-color .15s;
+}
+.history-item:hover { border-color: #F2B6C0; }
+
+.history-type {
+font-family: var(–serif); font-size: 10px; font-weight: 700;
+letter-spacing: .14em; text-transform: uppercase; color: var(–pink); margin-bottom: 5px;
+}
+.history-text {
+font-family: var(–body); font-size: 14px; line-height: 1.75; color: var(–ink); word-break: break-word;
+}
+.history-text em { font-style: italic; }
+
+.history-actions { display: flex; flex-direction: column; gap: 6px; }
+.history-copy, .history-delete {
+font-family: var(–body); font-size: 11.5px; font-style: italic;
+padding: 5px 12px; border-radius: 6px; cursor: pointer;
+white-space: nowrap; transition: all .15s;
+border: 2px solid var(–rule); background: transparent; color: var(–muted);
+}
+.history-copy:hover   { border-color: var(–green); color: var(–green-dk); background: var(–green-lt); }
+.history-delete:hover { border-color: var(–coral); color: var(–coral); background: #fff0f0; }
+
+.empty-history {
+font-family: var(–body); font-style: italic; font-size: 13px;
+color: var(–muted); text-align: center; padding: 32px 0;
+border: 2px dashed var(–rule); border-radius: var(–r-lg);
 }
 
-.btn.secondary{background:var(--accent2)}
+/* ── Rules panel ── */
+.rules-toggle {
+font-family: var(–body); font-size: 12px; font-style: italic;
+padding: 7px 16px;
+border: 2px solid var(–rule); background: var(–surface);
+color: var(–muted); border-radius: 99px; cursor: pointer; transition: all .15s; margin-bottom: 14px;
+}
+.rules-toggle:hover { border-color: var(–teal); color: var(–teal); }
 
-.output{
-  white-space:pre-wrap;
-  background:#1e1715;
-  color:#fff2ea;
-  padding:14px;
-  border-radius:12px;
+.rules-panel {
+display: none;
+background: var(–surface); border: 2px solid var(–rule);
+border-radius: var(–r-lg); padding: 22px 26px; margin-bottom: 26px;
+animation: fadeUp .2s ease both;
+}
+.rules-panel.open { display: block; }
+.rules-panel h3 { font-family: var(–serif); font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+.rules-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rules-table th {
+font-family: var(–serif); font-size: 10px; font-weight: 700;
+letter-spacing: .12em; text-transform: uppercase; color: var(–muted);
+text-align: left; padding: 4px 10px 10px; border-bottom: 2px solid var(–rule);
+}
+.rules-table td { padding: 7px 10px; border-bottom: 1px solid #F0E4D4; vertical-align: top; }
+.rules-table tr:last-child td { border-bottom: none; }
+.rules-table td:first-child { font-family: var(–serif); font-size: 12px; font-weight: 700; color: var(–pink); }
+
+/* ── Annotated bibliography ── */
+.annot-intro {
+font-family: var(–body); font-size: 14px; color: var(–muted);
+margin-bottom: 24px; line-height: 1.75;
+background: var(–pink-lt); border-left: 4px solid var(–pink);
+padding: 14px 18px; border-radius: 0 var(–r) var(–r) 0;
+}
+.annot-intro strong { font-family: var(–serif); font-weight: 700; color: var(–ink); }
+
+.annot-card {
+background: var(–surface); border: 2px solid var(–rule);
+border-radius: var(–r-lg); padding: 30px 32px;
+margin-bottom: 22px; box-shadow: var(–shadow);
 }
 
-/* TABS */
-.tabs{
-  display:flex;
-  gap:10px;
-  margin-top:18px;
+.annot-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.annot-field label {
+font-family: var(–serif); font-size: 10px; font-weight: 700;
+letter-spacing: .14em; text-transform: uppercase; color: var(–muted);
+}
+.annot-field .hint {
+font-family: var(–body); font-size: 12px; font-style: italic; color: #A89888; margin-top: 1px;
+}
+.annot-field textarea {
+font-family: var(–body); font-size: 14px;
+padding: 10px 13px;
+border: 2px solid var(–rule); border-radius: var(–r);
+background: var(–bg); color: var(–ink);
+outline: none; width: 100%; resize: vertical; min-height: 86px; line-height: 1.7;
+transition: border-color .15s, box-shadow .15s;
+}
+.annot-field textarea:focus { border-color: var(–green); box-shadow: 0 0 0 3px #2EBF7814; }
+.annot-field textarea::placeholder { color: #C8B8A8; }
+
+.char-count {
+font-family: var(–body); font-size: 11px; font-style: italic;
+color: var(–muted); text-align: right; margin-top: -12px; margin-bottom: 4px;
+}
+.char-count.over { color: var(–coral); }
+
+.annot-generate-btn {
+font-family: var(–serif); font-size: 14px; font-weight: 700; letter-spacing: .05em;
+padding: 14px 32px;
+background: linear-gradient(135deg, var(–green) 0%, #1A7A4A 100%);
+color: #fff; border: none; border-radius: var(–r);
+cursor: pointer; transition: opacity .18s, transform .1s;
+width: 100%; margin-top: 6px;
+box-shadow: 0 4px 20px #2EBF7844;
+}
+.annot-generate-btn:hover  { opacity: .9; }
+.annot-generate-btn:active { transform: scale(.98); }
+
+.annot-output-wrap { display: none; animation: fadeUp .3s ease both; margin-bottom: 26px; }
+.annot-output-wrap.visible { display: block; }
+
+.annot-output-box {
+background: var(–ink); color: #FFF4E8;
+font-family: var(–body); font-size: 15px; line-height: 1.9;
+padding: 28px 32px; border-radius: var(–r-lg);
+border-left: 4px solid var(–green);
+word-break: break-word;
+box-shadow: 0 8px 32px rgba(28,20,16,.15);
+}
+.annot-output-box em { font-style: italic; color: var(–butter); }
+.annot-annotation {
+display: block; margin-top: 14px;
+padding-left: 18px; border-left: 2px solid var(–green);
+color: #C0F0D8; font-family: var(–body); font-size: 14px; line-height: 1.8;
 }
 
-.tab{
-  border:1px solid var(--line);
-  background:white;
-  padding:10px 14px;
-  border-radius:999px;
-  cursor:pointer;
+.annot-history-item {
+background: var(–surface); border: 2px solid var(–rule);
+border-radius: var(–r-lg); padding: 18px 20px;
+margin-bottom: 10px; animation: fadeUp .2s ease both; transition: border-color .15s;
+}
+.annot-history-item:hover { border-color: var(–teal); }
+.annot-history-type {
+font-family: var(–serif); font-size: 10px; font-weight: 700;
+letter-spacing: .14em; text-transform: uppercase; color: var(–green-dk); margin-bottom: 5px;
+}
+.annot-history-citation {
+font-family: var(–body); font-size: 14px; line-height: 1.75;
+margin-bottom: 10px; word-break: break-word;
+}
+.annot-history-citation em { font-style: italic; }
+.annot-history-annotation {
+font-family: var(–body); font-size: 13.5px; line-height: 1.75;
+color: var(–muted); padding: 10px 14px;
+background: var(–green-lt); border-radius: var(–r); margin-bottom: 10px;
+}
+.annot-history-actions { display: flex; gap: 8px; margin-top: 6px; }
+
+/* ── Animations ── */
+@keyframes fadeDown {
+from { opacity: 0; transform: translateY(-14px); }
+to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(10px); }
+to   { opacity: 1; transform: translateY(0); }
 }
 
-.tab.active{
-  background:var(--accent);
-  color:white;
-  border-color:var(--accent);
+@media (max-width: 560px) {
+.form-card, .annot-card { padding: 20px 16px; }
+.field-grid { grid-template-columns: 1fr; }
+header h1   { font-size: 2.2rem; }
+.tab        { padding: 8px 13px; font-size: 12px; }
+.history-item { grid-template-columns: 1fr; }
+.history-actions { flex-direction: row; }
 }
 </style>
+
 </head>
-
 <body>
-<div class="wrap">
+<div class="page">
 
-<h1>APA <span>Studio</span></h1>
-<div class="sub">Citation engine + annotated bibliography + export tools</div>
+<!-- ── Header ── -->
 
-<div class="tabs">
-  <button class="tab active" onclick="show('cite')">Citations</button>
-  <button class="tab" onclick="show('annot')">Annotated</button>
+<header>
+  <div class="header-pill">APA 7th Edition</div>
+  <h1><em>Citation</em> &amp; <span>Bibliography</span> Builder</h1>
+  <div class="header-sub">Fill in what you have — missing fields are handled automatically.</div>
+</header>
+
+<!-- ── Tab bar ── -->
+
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('citations', this)">📄 Citations</button>
+  <button class="tab" onclick="switchTab('annotated', this)">📝 Annotated Bibliography</button>
 </div>
 
-<div class="grid">
+<!-- ════════════════════════════════════
+     TAB 1 — CITATIONS
+════════════════════════════════════ -->
 
-<!-- LEFT -->
-<div>
+<div class="tab-panel active" id="tab-citations">
 
-<!-- CITATION -->
-<div class="card panel" id="cite">
+<button class="rules-toggle" onclick="togglePanel('rulesPanel','rulesBtn')" id="rulesBtn">▸ Null-handling rules</button>
 
-  <label>Author</label>
-  <input id="a">
+  <div class="rules-panel" id="rulesPanel">
+    <h3>How missing fields are handled</h3>
+    <table class="rules-table">
+      <thead><tr><th>Missing field</th><th>Fallback</th></tr></thead>
+      <tbody>
+        <tr><td>Authors</td><td>Falls back to editors with (Ed.)/(Eds.), or <em>(Author unknown)</em></td></tr>
+        <tr><td>Year</td><td>Replaced with <em>n.d.</em></td></tr>
+        <tr><td>Title</td><td>Replaced with <em>[No title]</em></td></tr>
+        <tr><td>Journal / Source</td><td>Replaced with <em>[Source unknown]</em></td></tr>
+        <tr><td>Publisher</td><td>Replaced with <em>[Publisher unknown]</em></td></tr>
+        <tr><td>DOI / URL</td><td>Omitted silently</td></tr>
+        <tr><td>Volume / Issue / Pages</td><td>Omitted silently</td></tr>
+        <tr><td>Location</td><td>Omitted (APA 7 no longer requires it)</td></tr>
+        <tr><td>Partial author name</td><td>Uses whatever is present</td></tr>
+        <tr><td>21+ authors</td><td>First 19 … last author (APA ellipsis rule)</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <label style="margin-top:10px;">Year</label>
-  <input id="y">
+  <div class="type-grid" id="typeGrid"></div>
+  <div class="form-card" id="formCard"></div>
 
-  <label style="margin-top:10px;">Title</label>
-  <input id="t">
+  <div class="output-wrap" id="outputWrap">
+    <div class="output-header">
+      <span class="output-label">✨ Generated Citation</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCitation()">Copy</button>
+    </div>
+    <div class="citation-box" id="citationBox"></div>
+  </div>
 
-  <button class="btn" onclick="genCitation()">Generate Citation</button>
-
-  <button class="btn secondary" onclick="exportDoc()">Export DOCX</button>
-  <button class="btn secondary" onclick="exportPDF()">Export PDF</button>
-
-</div>
-
-<!-- ANNOTATED -->
-<div class="card panel" id="annot" style="display:none">
-
-  <label>Citation Fields</label>
-  <input id="aa" placeholder="Author">
-  <input id="ay" placeholder="Year">
-  <input id="at" placeholder="Title">
-
-  <label style="margin-top:10px;">Summary</label>
-  <textarea id="s"></textarea>
-
-  <label>Evaluation</label>
-  <textarea id="e"></textarea>
-
-  <label>Reflection</label>
-  <textarea id="r"></textarea>
-
-  <button class="btn" onclick="genAnnot()">Generate Annotated Entry</button>
-
-</div>
-
-</div>
-
-<!-- RIGHT -->
-<div class="card">
-  <label>Output</label>
-  <div class="output" id="out"></div>
-</div>
-
-</div>
+  <div class="section-title">Citation History <span class="badge" id="historyBadge">0</span></div>
+  <div class="history-controls">
+    <button class="ghost-btn" onclick="clearHistory()">Delete all</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
 
 </div>
 
+<!-- ════════════════════════════════════
+     TAB 2 — ANNOTATED BIBLIOGRAPHY
+════════════════════════════════════ -->
+
+<div class="tab-panel" id="tab-annotated">
+
+  <div class="annot-intro">
+    An <strong>annotated bibliography</strong> pairs each citation with a short evaluative paragraph (typically 100–200 words).
+    Use Step 1 to build your citation, then Step 2 to write the annotation using the guided prompts.
+  </div>
+
+<button class="rules-toggle" onclick="togglePanel('rulesPanel2','rulesBtn2')" id="rulesBtn2">▸ Null-handling rules</button>
+
+  <div class="rules-panel" id="rulesPanel2">
+    <h3>How missing fields are handled</h3>
+    <table class="rules-table">
+      <thead><tr><th>Missing field</th><th>Fallback</th></tr></thead>
+      <tbody>
+        <tr><td>Authors</td><td>(Author unknown)</td></tr>
+        <tr><td>Year</td><td>n.d.</td></tr>
+        <tr><td>Title</td><td>[No title]</td></tr>
+        <tr><td>Source</td><td>[Source unknown]</td></tr>
+        <tr><td>Publisher</td><td>[Publisher unknown]</td></tr>
+        <tr><td>DOI / URL</td><td>Omitted</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="annot-card">
+    <div class="section-label">Step 1 — Citation</div>
+    <div class="type-grid" id="typeGrid2"></div>
+    <div class="form-card" id="formCard2" style="box-shadow:none;border-color:var(--green-lt);margin-bottom:8px;"></div>
+
+```
+<hr class="divider"/>
+
+<div class="section-label">Step 2 — Annotation</div>
+
+<div class="annot-field">
+  <label>Summary — What is this source about?</label>
+  <div class="hint">Describe the main argument, purpose, or findings in 2–3 sentences.</div>
+  <textarea id="annot_summary" rows="4" placeholder="e.g. This article examines how sleep deprivation affects executive function in adolescents. The authors conducted a longitudinal study across 12 schools and found significant correlations between…" oninput="updateCC('annot_summary','cc_s',250)"></textarea>
+  <div class="char-count" id="cc_s">0 / 250 chars recommended</div>
+</div>
+
+<div class="annot-field">
+  <label>Evaluation — How credible or useful is this source?</label>
+  <div class="hint">Comment on author credentials, methodology, potential bias, or the publication's reputation.</div>
+  <textarea id="annot_eval" rows="4" placeholder="e.g. The authors are affiliated with Harvard Medical School and use a robust randomized controlled design. However, the sample is limited to urban schools, which may restrict generalisability to…" oninput="updateCC('annot_eval','cc_e',200)"></textarea>
+  <div class="char-count" id="cc_e">0 / 200 chars recommended</div>
+</div>
+
+<div class="annot-field">
+  <label>Reflection — How does it fit your research?</label>
+  <div class="hint">Explain how this source supports, contradicts, or adds nuance to your argument or research question.</div>
+  <textarea id="annot_refl" rows="4" placeholder="e.g. This source directly supports my thesis that school start times impact academic performance. It will ground my literature review by providing empirical evidence that…" oninput="updateCC('annot_refl','cc_r',200)"></textarea>
+  <div class="char-count" id="cc_r">0 / 200 chars recommended</div>
+</div>
+
+<button class="annot-generate-btn" onclick="generateAnnotated()">Generate Annotated Entry</button>
+```
+
+  </div>
+
+  <div class="annot-output-wrap" id="annotOutputWrap">
+    <div class="output-header">
+      <span class="output-label">✨ Annotated Entry</span>
+      <button class="copy-btn" id="annotCopyBtn" onclick="copyAnnotated()">Copy</button>
+    </div>
+    <div class="annot-output-box" id="annotOutputBox"></div>
+  </div>
+
+  <div class="section-title">Annotated Bibliography <span class="badge" id="annotBadge">0</span></div>
+  <div class="history-controls">
+    <button class="ghost-btn" onclick="clearAnnotHistory()">Delete all</button>
+  </div>
+  <div id="annotHistoryList"></div>
+
+</div>
+
+</div><!-- /page -->
 <script>
-let lastText = "";
+// ════════════════════════════════════════════════
+// APA 7 ENGINE
+// ════════════════════════════════════════════════
 
-/* SAFE TAB SWITCH */
-function show(id){
-  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
-  document.getElementById(id).style.display='block';
+const clean = v => { if (v == null) return null; const s = String(v).trim(); return s || null; };
 
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
+function fmtName(last, first) {
+last = clean(last); first = clean(first);
+if (last && first) {
+const ini = first.split(/[\s-]+/).filter(Boolean).map(p => p[0].toUpperCase()).join(’. ’) + ‘.’;
+return `${last}, ${ini}`;
+}
+return last || first || null;
 }
 
-/* APA ENGINE (core) */
-function citation(a,y,t){
-  a = a || "Author unknown";
-  y = y || "n.d.";
-  t = t || "Untitled";
-  return `${a}. (${y}). ${t}.`;
+function fmtAuthors(arr) {
+const f = arr.map(a => fmtName(a.last, a.first)).filter(Boolean);
+if (!f.length) return ‘(Author unknown)’;
+if (f.length === 1) return f[0];
+if (f.length <= 20) return f.slice(0, -1).join(’, ’) + ‘, & ’ + f[f.length - 1];
+return f.slice(0, 19).join(’, ’) + ’, \u2026 ’ + f[f.length - 1];
 }
 
-/* CITATION */
-function genCitation(){
-  const txt = citation(
-    document.getElementById('a').value,
-    document.getElementById('y').value,
-    document.getElementById('t').value
-  );
-
-  lastText = txt;
-  document.getElementById('out').textContent = txt;
+function fmtEditors(arr) {
+const f = arr.map(a => fmtName(a.last, a.first)).filter(Boolean);
+if (!f.length) return ‘(Author unknown)’;
+const s = f.length === 1 ? ‘(Ed.)’ : ‘(Eds.)’;
+if (f.length === 1) return `${f[0]} ${s}`;
+return f.slice(0, -1).join(’, ’) + ’, & ’ + f[f.length - 1] + ` ${s}`;
 }
 
-/* ANNOTATED */
-function genAnnot(){
-  const base = citation(
-    document.getElementById('aa').value,
-    document.getElementById('ay').value,
-    document.getElementById('at').value
-  );
+const yr  = y => `(${clean(y) || 'n.d.'}).`;
+const IT  = t => `__I__${clean(t) || '[No title]'}__I__`;
+const SC  = t => { const s = clean(t) || ‘[No title]’; return s[0].toUpperCase() + s.slice(1); };
 
-  const s = document.getElementById('s').value;
-  const e = document.getElementById('e').value;
-  const r = document.getElementById('r').value;
-
-  const full =
-`${base}
-
-Summary: ${s}
-
-Evaluation: ${e}
-
-Reflection: ${r}`;
-
-  lastText = full;
-  document.getElementById('out').textContent = full;
+function resolveDOI(d, u) {
+d = clean(d); u = clean(u);
+if (d) { d = d.replace(/^https?://doi.org//i, ‘’).replace(/^doi:/i, ‘’); return `https://doi.org/${d}`; }
+return u;
 }
 
-/* DOCX EXPORT */
-function exportDoc(){
-  const { Document, Packer, Paragraph } = window.docx;
+// — Citation builders —
 
-  const doc = new Document({
-    sections:[{
-      children:[new Paragraph(lastText || "")]
-    }]
-  });
-
-  Packer.toBlob(doc).then(blob=>{
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "APA_Export.docx";
-    a.click();
-  });
+function bJournal({ authors, year, title, journal, volume, issue, pages, doi, url }) {
+const j = clean(journal) || ‘[Source unknown]’;
+const v = clean(volume), i = clean(issue), p = clean(pages);
+let src = IT(j);
+if (v) { src += `, ${IT(v)}`; if (i) src += `(${i})`; }
+if (p) src += `, ${p}`; src += ‘.’;
+const pts = [fmtAuthors(authors), yr(year), SC(title) + ‘.’, src];
+const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+return pts.join(’ ’);
 }
 
-/* PDF EXPORT (print-safe) */
-function exportPDF(){
-  const w = window.open("");
-  w.document.write(`<pre style="font-size:14px;font-family:serif;white-space:pre-wrap">${lastText}</pre>`);
-  w.print();
+function bBook({ authors, year, title, edition, publisher, doi, url, editors }) {
+const a = authors && authors.length ? fmtAuthors(authors) : editors && editors.length ? fmtEditors(editors) : ‘(Author unknown)’;
+const ed = clean(edition);
+let t = IT(title); if (ed) t += ` (${ed} ed.)`; t += ‘.’;
+const pub = clean(publisher) || ‘[Publisher unknown]’;
+const pts = [a, yr(year), t, pub + ‘.’];
+const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+return pts.join(’ ’);
 }
+
+function bChapter({ authors, year, chapter_title, editors, book_title, pages, publisher, doi, url }) {
+const ed = editors && editors.length ? fmtEditors(editors) : ‘(Ed. unknown) (Ed.)’;
+const p = clean(pages);
+let inStr = `In ${ed}, ${IT(book_title)}`; if (p) inStr += ` (pp. ${p})`; inStr += ‘.’;
+const pub = clean(publisher) || ‘[Publisher unknown]’;
+const pts = [fmtAuthors(authors), yr(year), SC(chapter_title) + ‘.’, inStr, pub + ‘.’];
+const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bWebsite({ authors, year, title, site_name, url, retrieval_date }) {
+const pts = [fmtAuthors(authors), yr(year), IT(title) + ‘.’];
+const s = clean(site_name); if (s) pts.push(s + ‘.’);
+const lk = clean(url);
+if (lk) pts.push(retrieval_date ? `Retrieved ${retrieval_date}, from ${lk}` : lk);
+else pts.push(’[URL unavailable]’);
+return pts.join(’ ’);
+}
+
+function bNewspaper({ authors, year, month_day, title, newspaper, url }) {
+const y = clean(year) || ‘n.d.’, md = clean(month_day);
+const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+const paper = clean(newspaper) || ‘[Source unknown]’;
+const pts = [fmtAuthors(authors), dt, SC(title) + ‘.’, IT(paper) + ‘.’];
+const lk = clean(url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bReport({ authors, year, title, report_number, institution, doi, url }) {
+const rn = clean(report_number);
+let t = IT(title); if (rn) t += ` (Report No. ${rn})`; t += ‘.’;
+const inst = clean(institution) || ‘[Publisher unknown]’;
+const pts = [fmtAuthors(authors), yr(year), t, inst + ‘.’];
+const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bPodcast({ host, year, month_day, episode_title, series_title, producer, url }) {
+const y = clean(year) || ‘n.d.’, md = clean(month_day);
+const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+const pts = [fmtAuthors(host), dt, SC(episode_title) + ’ [Audio podcast episode].’];
+const s = clean(series_title); if (s) pts.push(`In ${IT(s)}.`);
+const pr = clean(producer); if (pr) pts.push(pr + ‘.’);
+const lk = clean(url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bVideo({ authors, year, month_day, title, site_name, url }) {
+const y = clean(year) || ‘n.d.’, md = clean(month_day);
+const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+const pts = [fmtAuthors(authors), dt, IT(title) + ’ [Video].’];
+const s = clean(site_name); if (s) pts.push(s + ‘.’);
+const lk = clean(url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bDiss({ authors, year, title, degree_type, institution, database, url }) {
+const deg = clean(degree_type) || ‘Doctoral dissertation’;
+const inst = clean(institution) || ‘[Institution unknown]’;
+const t = IT(title) + ` [${deg}, ${inst}].`;
+const pts = [fmtAuthors(authors), yr(year), t];
+const db = clean(database); if (db) pts.push(db + ‘.’);
+const lk = clean(url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bConf({ authors, year, month_day, title, conference, location, doi, url }) {
+const y = clean(year) || ‘n.d.’, md = clean(month_day);
+const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+const conf = clean(conference) || ‘[Conference unknown]’;
+const loc = clean(location);
+const pts = [fmtAuthors(authors), dt, SC(title) + ’ [Conference paper].’, loc ? `${conf}, ${loc}.` : `${conf}.`];
+const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bMag({ authors, year, month_day, title, magazine, volume, issue, pages, url }) {
+const y = clean(year) || ‘n.d.’, md = clean(month_day);
+const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+const mag = clean(magazine) || ‘[Source unknown]’;
+const v = clean(volume), i = clean(issue), p = clean(pages);
+let src = IT(mag);
+if (v) { src += `, ${IT(v)}`; if (i) src += `(${i})`; }
+if (p) src += `, ${p}`; src += ‘.’;
+const pts = [fmtAuthors(authors), dt, SC(title) + ‘.’, src];
+const lk = clean(url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+function bSocial({ authors, year, month_day, post_text, platform, url }) {
+// APA 7: Author. (Year, Month Day). First 20 words of post [Platform post]. URL
+const y = clean(year) || ‘n.d.’, md = clean(month_day);
+const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+const plat = clean(platform) || ‘Social media’;
+let snippet = clean(post_text) || ‘[No post content]’;
+const words = snippet.split(/\s+/);
+if (words.length > 20) snippet = words.slice(0, 20).join(’ ‘) + ‘\u2026’;
+const pts = [fmtAuthors(authors), dt, `${snippet} [${plat} post].`];
+const lk = clean(url); if (lk) pts.push(lk);
+return pts.join(’ ’);
+}
+
+// ════════════════════════════════════════════════
+// SCHEMA
+// ════════════════════════════════════════════════
+
+const TYPES = [
+{ id: ‘journal_article’,  label: ‘Journal Article’  },
+{ id: ‘book’,             label: ‘Book’              },
+{ id: ‘book_chapter’,     label: ‘Book Chapter’      },
+{ id: ‘website’,          label: ‘Website’           },
+{ id: ‘newspaper’,        label: ‘Newspaper’         },
+{ id: ‘report’,           label: ‘Report’            },
+{ id: ‘podcast_episode’,  label: ‘Podcast’           },
+{ id: ‘video’,            label: ‘Video / YouTube’   },
+{ id: ‘dissertation’,     label: ‘Dissertation’      },
+{ id: ‘conference_paper’, label: ‘Conference Paper’  },
+{ id: ‘magazine_article’, label: ‘Magazine’          },
+{ id: ‘social_media’,     label: ‘Social Media’      },
+];
+
+const SCHEMAS = {
+journal_article: {
+authors: true,
+fields: [
+{ key: ‘year’,    label: ‘Year’,            ph: ‘e.g. 2023’ },
+{ key: ‘title’,   label: ‘Article Title’,   ph: ‘Sentence case title’, full: 1 },
+{ key: ‘journal’, label: ‘Journal Name’,    ph: ‘Journal of …’ },
+{ key: ‘volume’,  label: ‘Volume’,          ph: ‘e.g. 107’ },
+{ key: ‘issue’,   label: ‘Issue’,           ph: ‘e.g. 3’ },
+{ key: ‘pages’,   label: ‘Pages’,           ph: ‘e.g. 45–67’ },
+{ key: ‘doi’,     label: ‘DOI’,             ph: ‘10.xxxx/…’ },
+{ key: ‘url’,     label: ‘URL (if no DOI)’, ph: ‘https://…’ },
+],
+fn: d => bJournal(d),
+},
+book: {
+authors: true, editors: true,
+fields: [
+{ key: ‘year’,      label: ‘Year’,       ph: ‘e.g. 2020’ },
+{ key: ‘title’,     label: ‘Book Title’, ph: ‘Italicised title’, full: 1 },
+{ key: ‘edition’,   label: ‘Edition’,    ph: ‘e.g. 2nd’ },
+{ key: ‘publisher’, label: ‘Publisher’,  ph: ‘Publisher name’ },
+{ key: ‘doi’,       label: ‘DOI’,        ph: ‘10.xxxx/…’ },
+{ key: ‘url’,       label: ‘URL’,        ph: ‘https://…’ },
+],
+fn: d => bBook(d),
+},
+book_chapter: {
+authors: true, editors: true,
+fields: [
+{ key: ‘year’,          label: ‘Year’,          ph: ‘e.g. 2019’ },
+{ key: ‘chapter_title’, label: ‘Chapter Title’, ph: ‘Sentence case’, full: 1 },
+{ key: ‘book_title’,    label: ‘Book Title’,    ph: ‘Italicised’, full: 1 },
+{ key: ‘pages’,         label: ‘Pages’,         ph: ‘e.g. 112–134’ },
+{ key: ‘publisher’,     label: ‘Publisher’,     ph: ‘Publisher name’ },
+{ key: ‘doi’,           label: ‘DOI’,           ph: ‘10.xxxx/…’ },
+{ key: ‘url’,           label: ‘URL’,           ph: ‘https://…’ },
+],
+fn: d => bChapter(d),
+},
+website: {
+authors: true,
+fields: [
+{ key: ‘year’,           label: ‘Year’,           ph: ‘e.g. 2023’ },
+{ key: ‘title’,          label: ‘Page Title’,     ph: ‘Page title’, full: 1 },
+{ key: ‘site_name’,      label: ‘Site Name’,      ph: ‘e.g. NASA’ },
+{ key: ‘url’,            label: ‘URL’,            ph: ‘https://…’, full: 1 },
+{ key: ‘retrieval_date’, label: ‘Retrieval Date’, ph: ‘e.g. May 12, 2026 (only if content changes)’ },
+],
+fn: d => bWebsite(d),
+},
+newspaper: {
+authors: true,
+fields: [
+{ key: ‘year’,      label: ‘Year’,          ph: ‘e.g. 2023’ },
+{ key: ‘month_day’, label: ‘Month & Day’,   ph: ‘e.g. March 15’ },
+{ key: ‘title’,     label: ‘Article Title’, ph: ‘Sentence case’, full: 1 },
+{ key: ‘newspaper’, label: ‘Newspaper’,     ph: ‘The New York Times’ },
+{ key: ‘url’,       label: ‘URL’,           ph: ‘https://…’ },
+],
+fn: d => bNewspaper(d),
+},
+report: {
+authors: true,
+fields: [
+{ key: ‘year’,          label: ‘Year’,          ph: ‘e.g. 2021’ },
+{ key: ‘title’,         label: ‘Report Title’,  ph: ‘Italicised’, full: 1 },
+{ key: ‘report_number’, label: ‘Report Number’, ph: ‘e.g. 123’ },
+{ key: ‘institution’,   label: ‘Institution’,   ph: ‘e.g. WHO’ },
+{ key: ‘doi’,           label: ‘DOI’,           ph: ‘10.xxxx/…’ },
+{ key: ‘url’,           label: ‘URL’,           ph: ‘https://…’ },
+],
+fn: d => bReport(d),
+},
+podcast_episode: {
+host: true,
+fields: [
+{ key: ‘year’,          label: ‘Year’,          ph: ‘e.g. 2023’ },
+{ key: ‘month_day’,     label: ‘Month & Day’,   ph: ‘e.g. June 4’ },
+{ key: ‘episode_title’, label: ‘Episode Title’, ph: ‘Sentence case’, full: 1 },
+{ key: ‘series_title’,  label: ‘Series / Show’, ph: ‘Show name’, full: 1 },
+{ key: ‘producer’,      label: ‘Producer’,      ph: ‘e.g. TED Audio Collective’ },
+{ key: ‘url’,           label: ‘URL’,           ph: ‘https://…’ },
+],
+fn: d => bPodcast(d),
+},
+video: {
+authors: true,
+fields: [
+{ key: ‘year’,      label: ‘Year’,        ph: ‘e.g. 2022’ },
+{ key: ‘month_day’, label: ‘Month & Day’, ph: ‘e.g. April 3’ },
+{ key: ‘title’,     label: ‘Video Title’, ph: ‘Italicised’, full: 1 },
+{ key: ‘site_name’, label: ‘Platform’,    ph: ‘e.g. YouTube, Vimeo’ },
+{ key: ‘url’,       label: ‘URL’,         ph: ‘https://…’ },
+],
+fn: d => bVideo(d),
+},
+dissertation: {
+authors: true,
+fields: [
+{ key: ‘year’,        label: ‘Year’,        ph: ‘e.g. 2021’ },
+{ key: ‘title’,       label: ‘Title’,       ph: ‘Dissertation title’, full: 1 },
+{ key: ‘degree_type’, label: ‘Degree Type’, ph: ‘e.g. Doctoral dissertation’ },
+{ key: ‘institution’, label: ‘Institution’, ph: ‘e.g. Stanford University’ },
+{ key: ‘database’,    label: ‘Database’,    ph: ‘e.g. ProQuest’, full: 1 },
+{ key: ‘url’,         label: ‘URL’,         ph: ‘https://…’ },
+],
+fn: d => bDiss(d),
+},
+conference_paper: {
+authors: true,
+fields: [
+{ key: ‘year’,       label: ‘Year’,        ph: ‘e.g. 2022’ },
+{ key: ‘month_day’,  label: ‘Dates’,       ph: ‘e.g. Sept 12–15’ },
+{ key: ‘title’,      label: ‘Paper Title’, ph: ‘Sentence case’, full: 1 },
+{ key: ‘conference’, label: ‘Conference’,  ph: ‘Proceedings of …’, full: 1 },
+{ key: ‘location’,   label: ‘Location’,    ph: ‘e.g. Dublin, Ireland’ },
+{ key: ‘doi’,        label: ‘DOI’,         ph: ‘10.xxxx/…’ },
+{ key: ‘url’,        label: ‘URL’,         ph: ‘https://…’ },
+],
+fn: d => bConf(d),
+},
+magazine_article: {
+authors: true,
+fields: [
+{ key: ‘year’,      label: ‘Year’,          ph: ‘e.g. 2023’ },
+{ key: ‘month_day’, label: ‘Month’,         ph: ‘e.g. April’ },
+{ key: ‘title’,     label: ‘Article Title’, ph: ‘Sentence case’, full: 1 },
+{ key: ‘magazine’,  label: ‘Magazine’,      ph: ‘e.g. Wired’ },
+{ key: ‘volume’,    label: ‘Volume’,        ph: ‘e.g. 31’ },
+{ key: ‘issue’,     label: ‘Issue’,         ph: ‘e.g. 4’ },
+{ key: ‘pages’,     label: ‘Pages’,         ph: ‘e.g. 54–61’ },
+{ key: ‘url’,       label: ‘URL’,           ph: ‘https://…’ },
+],
+fn: d => bMag(d),
+},
+social_media: {
+authors: true,
+fields: [
+{ key: ‘year’,      label: ‘Year’,                           ph: ‘e.g. 2024’ },
+{ key: ‘month_day’, label: ‘Month & Day’,                    ph: ‘e.g. January 14’ },
+{ key: ‘post_text’, label: ‘Post text (first ~20 words)’,    ph: ‘Paste the beginning of the post…’, full: 1 },
+{ key: ‘platform’,  label: ‘Platform’,                       ph: ‘e.g. X (Twitter), Instagram, Facebook, TikTok’ },
+{ key: ‘url’,       label: ‘Post URL’,                       ph: ‘https://…’, full: 1 },
+],
+fn: d => bSocial(d),
+},
+};
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+
+let currentType  = ‘journal_article’;
+let currentType2 = ‘journal_article’;
+let citHistory   = [];
+let annotHistory = [];
+let lastRaw      = ‘’;
+let lastAnnotRaw = ‘’;
+let lastAnnotTxt = ‘’;
+
+// ════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════
+
+function switchTab(id, btn) {
+document.querySelectorAll(’.tab-panel’).forEach(p => p.classList.remove(‘active’));
+document.querySelectorAll(’.tab’).forEach(b => b.classList.remove(‘active’));
+document.getElementById(‘tab-’ + id).classList.add(‘active’);
+btn.classList.add(‘active’);
+}
+
+// ════════════════════════════════════════════════
+// TYPE GRIDS
+// ════════════════════════════════════════════════
+
+function buildTypeGrid(containerId, getActive, onSelect) {
+const g = document.getElementById(containerId);
+g.innerHTML = TYPES.map(t =>
+`<button class="type-btn${t.id === getActive() ? ' active' : ''}" data-id="${t.id}">${t.label}</button>`
+).join(’’);
+g.querySelectorAll(’.type-btn’).forEach(btn => {
+btn.addEventListener(‘click’, () => {
+g.querySelectorAll(’.type-btn’).forEach(b => b.classList.remove(‘active’));
+btn.classList.add(‘active’);
+onSelect(btn.dataset.id);
+});
+});
+}
+
+// ════════════════════════════════════════════════
+// FORM RENDERING
+// ════════════════════════════════════════════════
+
+function renderForm(cardId, typeId, px) {
+const schema = SCHEMAS[typeId];
+const card   = document.getElementById(cardId);
+let html = ‘’;
+
+if (schema.authors) {
+html += `<div class="section-label">Authors</div> <div class="author-list" id="${px}aList"></div> <button class="add-btn" onclick="addRow('${px}aList')">+ Add author</button> <hr class="divider"/>`;
+}
+if (schema.host) {
+html += `<div class="section-label">Host(s)</div> <div class="author-list" id="${px}hList"></div> <button class="add-btn" onclick="addRow('${px}hList')">+ Add host</button> <hr class="divider"/>`;
+}
+if (schema.editors) {
+html += `<div class="section-label">Editors <span style="font-style:italic;font-weight:400">(optional)</span></div> <div class="author-list" id="${px}eList"></div> <button class="add-btn" onclick="addRow('${px}eList')">+ Add editor</button> <hr class="divider"/>`;
+}
+
+html += `<div class="section-label">Details</div><div class="field-grid">`;
+for (const f of schema.fields) {
+html += `<div class="field${f.full ? ' full' : ''}"> <label>${f.label}</label> <input type="text" id="${px}f_${f.key}" placeholder="${f.ph}"/> </div>`;
+}
+html += `</div>`;
+
+if (px === ‘a_’) {
+html += `<button class="generate-btn" onclick="generate()">Generate Citation</button>`;
+}
+
+card.innerHTML = html;
+if (schema.authors) addRow(`${px}aList`);
+if (schema.host)    addRow(`${px}hList`);
+}
+
+function addRow(listId) {
+const list = document.getElementById(listId);
+if (!list) return;
+const d = document.createElement(‘div’);
+d.className = ‘author-row’;
+d.innerHTML = ` <input type="text" placeholder="Last name" class="al" style="padding:9px 12px;border:2px solid var(--rule);border-radius:var(--r);font-family:var(--body);font-size:14px;background:var(--bg);color:var(--ink);outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--rule)'"/> <input type="text" placeholder="First name(s)" class="af" style="padding:9px 12px;border:2px solid var(--rule);border-radius:var(--r);font-family:var(--body);font-size:14px;background:var(--bg);color:var(--ink);outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--rule)'"/> <button class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
+list.appendChild(d);
+}
+
+function collectPeople(listId) {
+const list = document.getElementById(listId);
+if (!list) return [];
+return Array.from(list.querySelectorAll(’.author-row’))
+.map(r => ({ last: r.querySelector(’.al’).value.trim() || null, first: r.querySelector(’.af’).value.trim() || null }))
+.filter(a => a.last || a.first);
+}
+
+function getF(id) { const e = document.getElementById(id); return e ? e.value.trim() || null : null; }
+
+function collectData(px, typeId) {
+const s = SCHEMAS[typeId]; const d = {};
+if (s.authors) d.authors = collectPeople(`${px}aList`);
+if (s.host)    d.host    = collectPeople(`${px}hList`);
+if (s.editors) d.editors = collectPeople(`${px}eList`);
+for (const f of s.fields) d[f.key] = getF(`${px}f_${f.key}`);
+return d;
+}
+
+// ════════════════════════════════════════════════
+// CITATIONS — GENERATE / HISTORY
+// ════════════════════════════════════════════════
+
+function generate() {
+const data = collectData(‘a_’, currentType);
+const raw  = SCHEMAS[currentType].fn(data);
+lastRaw = raw;
+
+document.getElementById(‘citationBox’).innerHTML = renderI(raw);
+document.getElementById(‘outputWrap’).classList.add(‘visible’);
+document.getElementById(‘outputWrap’).scrollIntoView({ behavior: ‘smooth’, block: ‘nearest’ });
+
+const lbl = TYPES.find(t => t.id === currentType)?.label || currentType;
+citHistory.unshift({ type: lbl, raw, rendered: renderI(raw) });
+if (citHistory.length > 50) citHistory.pop();
+renderCitHistory();
+
+const b = document.getElementById(‘copyBtn’);
+b.textContent = ‘Copy’; b.classList.remove(‘copied’);
+}
+
+const renderI = s => s.replace(/**I**(.*?)**I**/g, ‘<em>$1</em>’);
+const plain   = s => s.replace(/**I**(.*?)**I**/g, ‘$1’);
+
+function copyCitation() {
+navigator.clipboard.writeText(plain(lastRaw)).then(() => {
+const b = document.getElementById(‘copyBtn’);
+b.textContent = ‘Copied!’; b.classList.add(‘copied’);
+setTimeout(() => { b.textContent = ‘Copy’; b.classList.remove(‘copied’); }, 2000);
+});
+}
+
+function deleteItem(i) { citHistory.splice(i, 1); renderCitHistory(); }
+function clearHistory() { citHistory = []; renderCitHistory(); }
+
+function renderCitHistory() {
+const list = document.getElementById(‘historyList’);
+document.getElementById(‘historyBadge’).textContent = citHistory.length;
+if (!citHistory.length) {
+list.innerHTML = ‘<div class="empty-history">No citations yet — generate one above.</div>’; return;
+}
+list.innerHTML = citHistory.map((item, i) => ` <div class="history-item"> <div> <div class="history-type">${item.type}</div> <div class="history-text">${item.rendered}</div> </div> <div class="history-actions"> <button class="history-copy"   onclick="navigator.clipboard.writeText(plain(citHistory[${i}].raw))">Copy</button> <button class="history-delete" onclick="deleteItem(${i})">Delete</button> </div> </div>`).join(’’);
+}
+
+// ════════════════════════════════════════════════
+// ANNOTATED — GENERATE / HISTORY
+// ════════════════════════════════════════════════
+
+function updateCC(taId, ccId, max) {
+const len = document.getElementById(taId).value.trim().length;
+const el  = document.getElementById(ccId);
+el.textContent = `${len} / ${max} chars recommended`;
+el.classList.toggle(‘over’, len > max);
+}
+
+function generateAnnotated() {
+const data  = collectData(‘b_’, currentType2);
+const raw   = SCHEMAS[currentType2].fn(data);
+lastAnnotRaw = raw;
+
+const sum = document.getElementById(‘annot_summary’).value.trim();
+const ev  = document.getElementById(‘annot_eval’).value.trim();
+const ref = document.getElementById(‘annot_refl’).value.trim();
+lastAnnotTxt = [sum, ev, ref].filter(Boolean).join(’ ’);
+
+const box = document.getElementById(‘annotOutputBox’);
+box.innerHTML = `<span>${renderI(raw)}</span>` +
+(lastAnnotTxt ? `<span class="annot-annotation">${lastAnnotTxt}</span>` : ‘’);
+
+document.getElementById(‘annotOutputWrap’).classList.add(‘visible’);
+document.getElementById(‘annotOutputWrap’).scrollIntoView({ behavior: ‘smooth’, block: ‘nearest’ });
+
+const lbl = TYPES.find(t => t.id === currentType2)?.label || currentType2;
+annotHistory.unshift({ type: lbl, raw, rendered: renderI(raw), annotation: lastAnnotTxt });
+if (annotHistory.length > 50) annotHistory.pop();
+renderAnnotHistory();
+
+const b = document.getElementById(‘annotCopyBtn’);
+b.textContent = ‘Copy’; b.classList.remove(‘copied’);
+}
+
+function copyAnnotated() {
+const txt = plain(lastAnnotRaw) + (lastAnnotTxt ? ’\n\n    ’ + lastAnnotTxt : ‘’);
+navigator.clipboard.writeText(txt).then(() => {
+const b = document.getElementById(‘annotCopyBtn’);
+b.textContent = ‘Copied!’; b.classList.add(‘copied’);
+setTimeout(() => { b.textContent = ‘Copy’; b.classList.remove(‘copied’); }, 2000);
+});
+}
+
+function deleteAnnotItem(i) { annotHistory.splice(i, 1); renderAnnotHistory(); }
+function clearAnnotHistory() { annotHistory = []; renderAnnotHistory(); }
+
+function renderAnnotHistory() {
+const list = document.getElementById(‘annotHistoryList’);
+document.getElementById(‘annotBadge’).textContent = annotHistory.length;
+if (!annotHistory.length) {
+list.innerHTML = ‘<div class="empty-history">No annotated entries yet.</div>’; return;
+}
+list.innerHTML = annotHistory.map((item, i) => `<div class="annot-history-item"> <div class="annot-history-type">${item.type}</div> <div class="annot-history-citation">${item.rendered}</div> ${item.annotation ?`<div class="annot-history-annotation">${item.annotation}</div>` : ''} <div class="annot-history-actions"> <button class="history-copy" onclick="(() => { const t = plain(annotHistory[${i}].raw) + (annotHistory[${i}].annotation ? '\\n\\n    ' + annotHistory[${i}].annotation : ''); navigator.clipboard.writeText(t); })()">Copy</button> <button class="history-delete" onclick="deleteAnnotItem(${i})">Delete</button> </div> </div>`).join(’’);
+}
+
+// ════════════════════════════════════════════════
+// RULES PANEL TOGGLE
+// ════════════════════════════════════════════════
+
+function togglePanel(panelId, btnId) {
+const p = document.getElementById(panelId);
+const b = document.getElementById(btnId);
+const open = p.classList.toggle(‘open’);
+b.textContent = (open ? ‘▾’ : ‘▸’) + ’ Null-handling rules’;
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+
+buildTypeGrid(‘typeGrid’, () => currentType, id => {
+currentType = id;
+renderForm(‘formCard’, currentType, ‘a_’);
+document.getElementById(‘outputWrap’).classList.remove(‘visible’);
+});
+
+buildTypeGrid(‘typeGrid2’, () => currentType2, id => {
+currentType2 = id;
+renderForm(‘formCard2’, currentType2, ‘b_’);
+});
+
+renderForm(‘formCard’,  currentType,  ‘a_’);
+renderForm(‘formCard2’, currentType2, ‘b_’);
+renderCitHistory();
+renderAnnotHistory();
 </script>
 
 </body>
