@@ -582,572 +582,522 @@ header h1   { font-size: 2.2rem; }
 // APA 7 ENGINE
 // ════════════════════════════════════════════════
 
+
 const clean = v => { if (v == null) return null; const s = String(v).trim(); return s || null; };
 
 function fmtName(last, first) {
-last = clean(last); first = clean(first);
-if (last && first) {
-const ini = first.split(/[\s-]+/).filter(Boolean).map(p => p[0].toUpperCase()).join(’. ’) + ‘.’;
-return `${last}, ${ini}`;
-}
-return last || first || null;
+  last = clean(last); first = clean(first);
+  if (last && first) {
+    const ini = first.split(/[\s\-]+/).filter(Boolean).map(p => p[0].toUpperCase()).join('. ') + '.';
+    return `${last}, ${ini}`;
+  }
+  return last || first || null;
 }
 
 function fmtAuthors(arr) {
-const f = arr.map(a => fmtName(a.last, a.first)).filter(Boolean);
-if (!f.length) return ‘(Author unknown)’;
-if (f.length === 1) return f[0];
-if (f.length <= 20) return f.slice(0, -1).join(’, ’) + ‘, & ’ + f[f.length - 1];
-return f.slice(0, 19).join(’, ’) + ’, \u2026 ’ + f[f.length - 1];
+  const f = arr.map(a => fmtName(a.last, a.first)).filter(Boolean);
+  if (!f.length) return '(Author unknown)';
+  if (f.length === 1) return f[0];
+  if (f.length <= 20) return f.slice(0, -1).join(', ') + ', & ' + f[f.length - 1];
+  return f.slice(0, 19).join(', ') + ', \u2026 ' + f[f.length - 1];
 }
 
 function fmtEditors(arr) {
-const f = arr.map(a => fmtName(a.last, a.first)).filter(Boolean);
-if (!f.length) return ‘(Author unknown)’;
-const s = f.length === 1 ? ‘(Ed.)’ : ‘(Eds.)’;
-if (f.length === 1) return `${f[0]} ${s}`;
-return f.slice(0, -1).join(’, ’) + ’, & ’ + f[f.length - 1] + ` ${s}`;
+  const f = arr.map(a => fmtName(a.last, a.first)).filter(Boolean);
+  if (!f.length) return '(Author unknown)';
+  const s = f.length === 1 ? '(Ed.)' : '(Eds.)';
+  if (f.length === 1) return `${f[0]} ${s}`;
+  return f.slice(0, -1).join(', ') + ', & ' + f[f.length - 1] + ` ${s}`;
 }
 
-const yr  = y => `(${clean(y) || 'n.d.'}).`;
-const IT  = t => `__I__${clean(t) || '[No title]'}__I__`;
-const SC  = t => { const s = clean(t) || ‘[No title]’; return s[0].toUpperCase() + s.slice(1); };
+const yr = y => `(${clean(y) || 'n.d.'}).`;
+const IT = t => `__I__${clean(t) || '[No title]'}__I__`;
+const SC = t => { const s = clean(t) || '[No title]'; return s[0].toUpperCase() + s.slice(1); };
 
 function resolveDOI(d, u) {
-d = clean(d); u = clean(u);
-if (d) { d = d.replace(/^https?://doi.org//i, ‘’).replace(/^doi:/i, ‘’); return `https://doi.org/${d}`; }
-return u;
+  d = clean(d); u = clean(u);
+  if (d) { d = d.replace(/^https?:\/\/doi\.org\//i, '').replace(/^doi:/i, ''); return `https://doi.org/${d}`; }
+  return u;
 }
 
-// — Citation builders —
-
 function bJournal({ authors, year, title, journal, volume, issue, pages, doi, url }) {
-const j = clean(journal) || ‘[Source unknown]’;
-const v = clean(volume), i = clean(issue), p = clean(pages);
-let src = IT(j);
-if (v) { src += `, ${IT(v)}`; if (i) src += `(${i})`; }
-if (p) src += `, ${p}`; src += ‘.’;
-const pts = [fmtAuthors(authors), yr(year), SC(title) + ‘.’, src];
-const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const j = clean(journal) || '[Source unknown]';
+  const v = clean(volume), i = clean(issue), p = clean(pages);
+  let src = IT(j);
+  if (v) { src += `, ${IT(v)}`; if (i) src += `(${i})`; }
+  if (p) src += `, ${p}`; src += '.';
+  const pts = [fmtAuthors(authors), yr(year), SC(title) + '.', src];
+  const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bBook({ authors, year, title, edition, publisher, doi, url, editors }) {
-const a = authors && authors.length ? fmtAuthors(authors) : editors && editors.length ? fmtEditors(editors) : ‘(Author unknown)’;
-const ed = clean(edition);
-let t = IT(title); if (ed) t += ` (${ed} ed.)`; t += ‘.’;
-const pub = clean(publisher) || ‘[Publisher unknown]’;
-const pts = [a, yr(year), t, pub + ‘.’];
-const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const a = authors && authors.length ? fmtAuthors(authors) : editors && editors.length ? fmtEditors(editors) : '(Author unknown)';
+  const ed = clean(edition);
+  let t = IT(title); if (ed) t += ` (${ed} ed.)`; t += '.';
+  const pub = clean(publisher) || '[Publisher unknown]';
+  const pts = [a, yr(year), t, pub + '.'];
+  const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bChapter({ authors, year, chapter_title, editors, book_title, pages, publisher, doi, url }) {
-const ed = editors && editors.length ? fmtEditors(editors) : ‘(Ed. unknown) (Ed.)’;
-const p = clean(pages);
-let inStr = `In ${ed}, ${IT(book_title)}`; if (p) inStr += ` (pp. ${p})`; inStr += ‘.’;
-const pub = clean(publisher) || ‘[Publisher unknown]’;
-const pts = [fmtAuthors(authors), yr(year), SC(chapter_title) + ‘.’, inStr, pub + ‘.’];
-const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const ed = editors && editors.length ? fmtEditors(editors) : '(Ed. unknown) (Ed.)';
+  const p = clean(pages);
+  let inStr = `In ${ed}, ${IT(book_title)}`; if (p) inStr += ` (pp. ${p})`; inStr += '.';
+  const pub = clean(publisher) || '[Publisher unknown]';
+  const pts = [fmtAuthors(authors), yr(year), SC(chapter_title) + '.', inStr, pub + '.'];
+  const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bWebsite({ authors, year, title, site_name, url, retrieval_date }) {
-const pts = [fmtAuthors(authors), yr(year), IT(title) + ‘.’];
-const s = clean(site_name); if (s) pts.push(s + ‘.’);
-const lk = clean(url);
-if (lk) pts.push(retrieval_date ? `Retrieved ${retrieval_date}, from ${lk}` : lk);
-else pts.push(’[URL unavailable]’);
-return pts.join(’ ’);
+  const pts = [fmtAuthors(authors), yr(year), IT(title) + '.'];
+  const s = clean(site_name); if (s) pts.push(s + '.');
+  const lk = clean(url);
+  if (lk) pts.push(retrieval_date ? `Retrieved ${retrieval_date}, from ${lk}` : lk);
+  else pts.push('[URL unavailable]');
+  return pts.join(' ');
 }
 
 function bNewspaper({ authors, year, month_day, title, newspaper, url }) {
-const y = clean(year) || ‘n.d.’, md = clean(month_day);
-const dt = md ? `(${y}, ${md}).` : `(${y}).`;
-const paper = clean(newspaper) || ‘[Source unknown]’;
-const pts = [fmtAuthors(authors), dt, SC(title) + ‘.’, IT(paper) + ‘.’];
-const lk = clean(url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const y = clean(year) || 'n.d.', md = clean(month_day);
+  const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+  const paper = clean(newspaper) || '[Source unknown]';
+  const pts = [fmtAuthors(authors), dt, SC(title) + '.', IT(paper) + '.'];
+  const lk = clean(url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bReport({ authors, year, title, report_number, institution, doi, url }) {
-const rn = clean(report_number);
-let t = IT(title); if (rn) t += ` (Report No. ${rn})`; t += ‘.’;
-const inst = clean(institution) || ‘[Publisher unknown]’;
-const pts = [fmtAuthors(authors), yr(year), t, inst + ‘.’];
-const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const rn = clean(report_number);
+  let t = IT(title); if (rn) t += ` (Report No. ${rn})`; t += '.';
+  const inst = clean(institution) || '[Publisher unknown]';
+  const pts = [fmtAuthors(authors), yr(year), t, inst + '.'];
+  const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bPodcast({ host, year, month_day, episode_title, series_title, producer, url }) {
-const y = clean(year) || ‘n.d.’, md = clean(month_day);
-const dt = md ? `(${y}, ${md}).` : `(${y}).`;
-const pts = [fmtAuthors(host), dt, SC(episode_title) + ’ [Audio podcast episode].’];
-const s = clean(series_title); if (s) pts.push(`In ${IT(s)}.`);
-const pr = clean(producer); if (pr) pts.push(pr + ‘.’);
-const lk = clean(url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const y = clean(year) || 'n.d.', md = clean(month_day);
+  const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+  const pts = [fmtAuthors(host), dt, SC(episode_title) + ' [Audio podcast episode].'];
+  const s = clean(series_title); if (s) pts.push(`In ${IT(s)}.`);
+  const pr = clean(producer); if (pr) pts.push(pr + '.');
+  const lk = clean(url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bVideo({ authors, year, month_day, title, site_name, url }) {
-const y = clean(year) || ‘n.d.’, md = clean(month_day);
-const dt = md ? `(${y}, ${md}).` : `(${y}).`;
-const pts = [fmtAuthors(authors), dt, IT(title) + ’ [Video].’];
-const s = clean(site_name); if (s) pts.push(s + ‘.’);
-const lk = clean(url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const y = clean(year) || 'n.d.', md = clean(month_day);
+  const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+  const pts = [fmtAuthors(authors), dt, IT(title) + ' [Video].'];
+  const s = clean(site_name); if (s) pts.push(s + '.');
+  const lk = clean(url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bDiss({ authors, year, title, degree_type, institution, database, url }) {
-const deg = clean(degree_type) || ‘Doctoral dissertation’;
-const inst = clean(institution) || ‘[Institution unknown]’;
-const t = IT(title) + ` [${deg}, ${inst}].`;
-const pts = [fmtAuthors(authors), yr(year), t];
-const db = clean(database); if (db) pts.push(db + ‘.’);
-const lk = clean(url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const deg = clean(degree_type) || 'Doctoral dissertation';
+  const inst = clean(institution) || '[Institution unknown]';
+  const t = IT(title) + ` [${deg}, ${inst}].`;
+  const pts = [fmtAuthors(authors), yr(year), t];
+  const db = clean(database); if (db) pts.push(db + '.');
+  const lk = clean(url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bConf({ authors, year, month_day, title, conference, location, doi, url }) {
-const y = clean(year) || ‘n.d.’, md = clean(month_day);
-const dt = md ? `(${y}, ${md}).` : `(${y}).`;
-const conf = clean(conference) || ‘[Conference unknown]’;
-const loc = clean(location);
-const pts = [fmtAuthors(authors), dt, SC(title) + ’ [Conference paper].’, loc ? `${conf}, ${loc}.` : `${conf}.`];
-const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const y = clean(year) || 'n.d.', md = clean(month_day);
+  const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+  const conf = clean(conference) || '[Conference unknown]';
+  const loc = clean(location);
+  const pts = [fmtAuthors(authors), dt, SC(title) + ' [Conference paper].', loc ? `${conf}, ${loc}.` : `${conf}.`];
+  const lk = resolveDOI(doi, url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bMag({ authors, year, month_day, title, magazine, volume, issue, pages, url }) {
-const y = clean(year) || ‘n.d.’, md = clean(month_day);
-const dt = md ? `(${y}, ${md}).` : `(${y}).`;
-const mag = clean(magazine) || ‘[Source unknown]’;
-const v = clean(volume), i = clean(issue), p = clean(pages);
-let src = IT(mag);
-if (v) { src += `, ${IT(v)}`; if (i) src += `(${i})`; }
-if (p) src += `, ${p}`; src += ‘.’;
-const pts = [fmtAuthors(authors), dt, SC(title) + ‘.’, src];
-const lk = clean(url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const y = clean(year) || 'n.d.', md = clean(month_day);
+  const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+  const mag = clean(magazine) || '[Source unknown]';
+  const v = clean(volume), i = clean(issue), p = clean(pages);
+  let src = IT(mag);
+  if (v) { src += `, ${IT(v)}`; if (i) src += `(${i})`; }
+  if (p) src += `, ${p}`; src += '.';
+  const pts = [fmtAuthors(authors), dt, SC(title) + '.', src];
+  const lk = clean(url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
 function bSocial({ authors, year, month_day, post_text, platform, url }) {
-// APA 7: Author. (Year, Month Day). First 20 words of post [Platform post]. URL
-const y = clean(year) || ‘n.d.’, md = clean(month_day);
-const dt = md ? `(${y}, ${md}).` : `(${y}).`;
-const plat = clean(platform) || ‘Social media’;
-let snippet = clean(post_text) || ‘[No post content]’;
-const words = snippet.split(/\s+/);
-if (words.length > 20) snippet = words.slice(0, 20).join(’ ‘) + ‘\u2026’;
-const pts = [fmtAuthors(authors), dt, `${snippet} [${plat} post].`];
-const lk = clean(url); if (lk) pts.push(lk);
-return pts.join(’ ’);
+  const y = clean(year) || 'n.d.', md = clean(month_day);
+  const dt = md ? `(${y}, ${md}).` : `(${y}).`;
+  const plat = clean(platform) || 'Social media';
+  let snippet = clean(post_text) || '[No post content]';
+  const words = snippet.split(/\s+/);
+  if (words.length > 20) snippet = words.slice(0, 20).join(' ') + '\u2026';
+  const pts = [fmtAuthors(authors), dt, `${snippet} [${plat} post].`];
+  const lk = clean(url); if (lk) pts.push(lk);
+  return pts.join(' ');
 }
 
-// ════════════════════════════════════════════════
-// SCHEMA
-// ════════════════════════════════════════════════
-
 const TYPES = [
-{ id: ‘journal_article’,  label: ‘Journal Article’  },
-{ id: ‘book’,             label: ‘Book’              },
-{ id: ‘book_chapter’,     label: ‘Book Chapter’      },
-{ id: ‘website’,          label: ‘Website’           },
-{ id: ‘newspaper’,        label: ‘Newspaper’         },
-{ id: ‘report’,           label: ‘Report’            },
-{ id: ‘podcast_episode’,  label: ‘Podcast’           },
-{ id: ‘video’,            label: ‘Video / YouTube’   },
-{ id: ‘dissertation’,     label: ‘Dissertation’      },
-{ id: ‘conference_paper’, label: ‘Conference Paper’  },
-{ id: ‘magazine_article’, label: ‘Magazine’          },
-{ id: ‘social_media’,     label: ‘Social Media’      },
+  { id: 'journal_article',  label: 'Journal Article'  },
+  { id: 'book',             label: 'Book'              },
+  { id: 'book_chapter',     label: 'Book Chapter'      },
+  { id: 'website',          label: 'Website'           },
+  { id: 'newspaper',        label: 'Newspaper'         },
+  { id: 'report',           label: 'Report'            },
+  { id: 'podcast_episode',  label: 'Podcast'           },
+  { id: 'video',            label: 'Video / YouTube'   },
+  { id: 'dissertation',     label: 'Dissertation'      },
+  { id: 'conference_paper', label: 'Conference Paper'  },
+  { id: 'magazine_article', label: 'Magazine'          },
+  { id: 'social_media',     label: 'Social Media'      },
 ];
 
 const SCHEMAS = {
-journal_article: {
-authors: true,
-fields: [
-{ key: ‘year’,    label: ‘Year’,            ph: ‘e.g. 2023’ },
-{ key: ‘title’,   label: ‘Article Title’,   ph: ‘Sentence case title’, full: 1 },
-{ key: ‘journal’, label: ‘Journal Name’,    ph: ‘Journal of …’ },
-{ key: ‘volume’,  label: ‘Volume’,          ph: ‘e.g. 107’ },
-{ key: ‘issue’,   label: ‘Issue’,           ph: ‘e.g. 3’ },
-{ key: ‘pages’,   label: ‘Pages’,           ph: ‘e.g. 45–67’ },
-{ key: ‘doi’,     label: ‘DOI’,             ph: ‘10.xxxx/…’ },
-{ key: ‘url’,     label: ‘URL (if no DOI)’, ph: ‘https://…’ },
-],
-fn: d => bJournal(d),
-},
-book: {
-authors: true, editors: true,
-fields: [
-{ key: ‘year’,      label: ‘Year’,       ph: ‘e.g. 2020’ },
-{ key: ‘title’,     label: ‘Book Title’, ph: ‘Italicised title’, full: 1 },
-{ key: ‘edition’,   label: ‘Edition’,    ph: ‘e.g. 2nd’ },
-{ key: ‘publisher’, label: ‘Publisher’,  ph: ‘Publisher name’ },
-{ key: ‘doi’,       label: ‘DOI’,        ph: ‘10.xxxx/…’ },
-{ key: ‘url’,       label: ‘URL’,        ph: ‘https://…’ },
-],
-fn: d => bBook(d),
-},
-book_chapter: {
-authors: true, editors: true,
-fields: [
-{ key: ‘year’,          label: ‘Year’,          ph: ‘e.g. 2019’ },
-{ key: ‘chapter_title’, label: ‘Chapter Title’, ph: ‘Sentence case’, full: 1 },
-{ key: ‘book_title’,    label: ‘Book Title’,    ph: ‘Italicised’, full: 1 },
-{ key: ‘pages’,         label: ‘Pages’,         ph: ‘e.g. 112–134’ },
-{ key: ‘publisher’,     label: ‘Publisher’,     ph: ‘Publisher name’ },
-{ key: ‘doi’,           label: ‘DOI’,           ph: ‘10.xxxx/…’ },
-{ key: ‘url’,           label: ‘URL’,           ph: ‘https://…’ },
-],
-fn: d => bChapter(d),
-},
-website: {
-authors: true,
-fields: [
-{ key: ‘year’,           label: ‘Year’,           ph: ‘e.g. 2023’ },
-{ key: ‘title’,          label: ‘Page Title’,     ph: ‘Page title’, full: 1 },
-{ key: ‘site_name’,      label: ‘Site Name’,      ph: ‘e.g. NASA’ },
-{ key: ‘url’,            label: ‘URL’,            ph: ‘https://…’, full: 1 },
-{ key: ‘retrieval_date’, label: ‘Retrieval Date’, ph: ‘e.g. May 12, 2026 (only if content changes)’ },
-],
-fn: d => bWebsite(d),
-},
-newspaper: {
-authors: true,
-fields: [
-{ key: ‘year’,      label: ‘Year’,          ph: ‘e.g. 2023’ },
-{ key: ‘month_day’, label: ‘Month & Day’,   ph: ‘e.g. March 15’ },
-{ key: ‘title’,     label: ‘Article Title’, ph: ‘Sentence case’, full: 1 },
-{ key: ‘newspaper’, label: ‘Newspaper’,     ph: ‘The New York Times’ },
-{ key: ‘url’,       label: ‘URL’,           ph: ‘https://…’ },
-],
-fn: d => bNewspaper(d),
-},
-report: {
-authors: true,
-fields: [
-{ key: ‘year’,          label: ‘Year’,          ph: ‘e.g. 2021’ },
-{ key: ‘title’,         label: ‘Report Title’,  ph: ‘Italicised’, full: 1 },
-{ key: ‘report_number’, label: ‘Report Number’, ph: ‘e.g. 123’ },
-{ key: ‘institution’,   label: ‘Institution’,   ph: ‘e.g. WHO’ },
-{ key: ‘doi’,           label: ‘DOI’,           ph: ‘10.xxxx/…’ },
-{ key: ‘url’,           label: ‘URL’,           ph: ‘https://…’ },
-],
-fn: d => bReport(d),
-},
-podcast_episode: {
-host: true,
-fields: [
-{ key: ‘year’,          label: ‘Year’,          ph: ‘e.g. 2023’ },
-{ key: ‘month_day’,     label: ‘Month & Day’,   ph: ‘e.g. June 4’ },
-{ key: ‘episode_title’, label: ‘Episode Title’, ph: ‘Sentence case’, full: 1 },
-{ key: ‘series_title’,  label: ‘Series / Show’, ph: ‘Show name’, full: 1 },
-{ key: ‘producer’,      label: ‘Producer’,      ph: ‘e.g. TED Audio Collective’ },
-{ key: ‘url’,           label: ‘URL’,           ph: ‘https://…’ },
-],
-fn: d => bPodcast(d),
-},
-video: {
-authors: true,
-fields: [
-{ key: ‘year’,      label: ‘Year’,        ph: ‘e.g. 2022’ },
-{ key: ‘month_day’, label: ‘Month & Day’, ph: ‘e.g. April 3’ },
-{ key: ‘title’,     label: ‘Video Title’, ph: ‘Italicised’, full: 1 },
-{ key: ‘site_name’, label: ‘Platform’,    ph: ‘e.g. YouTube, Vimeo’ },
-{ key: ‘url’,       label: ‘URL’,         ph: ‘https://…’ },
-],
-fn: d => bVideo(d),
-},
-dissertation: {
-authors: true,
-fields: [
-{ key: ‘year’,        label: ‘Year’,        ph: ‘e.g. 2021’ },
-{ key: ‘title’,       label: ‘Title’,       ph: ‘Dissertation title’, full: 1 },
-{ key: ‘degree_type’, label: ‘Degree Type’, ph: ‘e.g. Doctoral dissertation’ },
-{ key: ‘institution’, label: ‘Institution’, ph: ‘e.g. Stanford University’ },
-{ key: ‘database’,    label: ‘Database’,    ph: ‘e.g. ProQuest’, full: 1 },
-{ key: ‘url’,         label: ‘URL’,         ph: ‘https://…’ },
-],
-fn: d => bDiss(d),
-},
-conference_paper: {
-authors: true,
-fields: [
-{ key: ‘year’,       label: ‘Year’,        ph: ‘e.g. 2022’ },
-{ key: ‘month_day’,  label: ‘Dates’,       ph: ‘e.g. Sept 12–15’ },
-{ key: ‘title’,      label: ‘Paper Title’, ph: ‘Sentence case’, full: 1 },
-{ key: ‘conference’, label: ‘Conference’,  ph: ‘Proceedings of …’, full: 1 },
-{ key: ‘location’,   label: ‘Location’,    ph: ‘e.g. Dublin, Ireland’ },
-{ key: ‘doi’,        label: ‘DOI’,         ph: ‘10.xxxx/…’ },
-{ key: ‘url’,        label: ‘URL’,         ph: ‘https://…’ },
-],
-fn: d => bConf(d),
-},
-magazine_article: {
-authors: true,
-fields: [
-{ key: ‘year’,      label: ‘Year’,          ph: ‘e.g. 2023’ },
-{ key: ‘month_day’, label: ‘Month’,         ph: ‘e.g. April’ },
-{ key: ‘title’,     label: ‘Article Title’, ph: ‘Sentence case’, full: 1 },
-{ key: ‘magazine’,  label: ‘Magazine’,      ph: ‘e.g. Wired’ },
-{ key: ‘volume’,    label: ‘Volume’,        ph: ‘e.g. 31’ },
-{ key: ‘issue’,     label: ‘Issue’,         ph: ‘e.g. 4’ },
-{ key: ‘pages’,     label: ‘Pages’,         ph: ‘e.g. 54–61’ },
-{ key: ‘url’,       label: ‘URL’,           ph: ‘https://…’ },
-],
-fn: d => bMag(d),
-},
-social_media: {
-authors: true,
-fields: [
-{ key: ‘year’,      label: ‘Year’,                           ph: ‘e.g. 2024’ },
-{ key: ‘month_day’, label: ‘Month & Day’,                    ph: ‘e.g. January 14’ },
-{ key: ‘post_text’, label: ‘Post text (first ~20 words)’,    ph: ‘Paste the beginning of the post…’, full: 1 },
-{ key: ‘platform’,  label: ‘Platform’,                       ph: ‘e.g. X (Twitter), Instagram, Facebook, TikTok’ },
-{ key: ‘url’,       label: ‘Post URL’,                       ph: ‘https://…’, full: 1 },
-],
-fn: d => bSocial(d),
-},
+  journal_article: {
+    authors: true,
+    fields: [
+      { key: 'year',    label: 'Year',            ph: 'e.g. 2023' },
+      { key: 'title',   label: 'Article Title',   ph: 'Sentence case title', full: 1 },
+      { key: 'journal', label: 'Journal Name',    ph: 'Journal of ...' },
+      { key: 'volume',  label: 'Volume',          ph: 'e.g. 107' },
+      { key: 'issue',   label: 'Issue',           ph: 'e.g. 3' },
+      { key: 'pages',   label: 'Pages',           ph: 'e.g. 45-67' },
+      { key: 'doi',     label: 'DOI',             ph: '10.xxxx/...' },
+      { key: 'url',     label: 'URL (if no DOI)', ph: 'https://...' },
+    ],
+    fn: d => bJournal(d),
+  },
+  book: {
+    authors: true, editors: true,
+    fields: [
+      { key: 'year',      label: 'Year',       ph: 'e.g. 2020' },
+      { key: 'title',     label: 'Book Title', ph: 'Italicised title', full: 1 },
+      { key: 'edition',   label: 'Edition',    ph: 'e.g. 2nd' },
+      { key: 'publisher', label: 'Publisher',  ph: 'Publisher name' },
+      { key: 'doi',       label: 'DOI',        ph: '10.xxxx/...' },
+      { key: 'url',       label: 'URL',        ph: 'https://...' },
+    ],
+    fn: d => bBook(d),
+  },
+  book_chapter: {
+    authors: true, editors: true,
+    fields: [
+      { key: 'year',          label: 'Year',          ph: 'e.g. 2019' },
+      { key: 'chapter_title', label: 'Chapter Title', ph: 'Sentence case', full: 1 },
+      { key: 'book_title',    label: 'Book Title',    ph: 'Italicised', full: 1 },
+      { key: 'pages',         label: 'Pages',         ph: 'e.g. 112-134' },
+      { key: 'publisher',     label: 'Publisher',     ph: 'Publisher name' },
+      { key: 'doi',           label: 'DOI',           ph: '10.xxxx/...' },
+      { key: 'url',           label: 'URL',           ph: 'https://...' },
+    ],
+    fn: d => bChapter(d),
+  },
+  website: {
+    authors: true,
+    fields: [
+      { key: 'year',           label: 'Year',           ph: 'e.g. 2023' },
+      { key: 'title',          label: 'Page Title',     ph: 'Page title', full: 1 },
+      { key: 'site_name',      label: 'Site Name',      ph: 'e.g. NASA' },
+      { key: 'url',            label: 'URL',            ph: 'https://...', full: 1 },
+      { key: 'retrieval_date', label: 'Retrieval Date', ph: 'e.g. May 12, 2026' },
+    ],
+    fn: d => bWebsite(d),
+  },
+  newspaper: {
+    authors: true,
+    fields: [
+      { key: 'year',      label: 'Year',          ph: 'e.g. 2023' },
+      { key: 'month_day', label: 'Month and Day', ph: 'e.g. March 15' },
+      { key: 'title',     label: 'Article Title', ph: 'Sentence case', full: 1 },
+      { key: 'newspaper', label: 'Newspaper',     ph: 'The New York Times' },
+      { key: 'url',       label: 'URL',           ph: 'https://...' },
+    ],
+    fn: d => bNewspaper(d),
+  },
+  report: {
+    authors: true,
+    fields: [
+      { key: 'year',          label: 'Year',          ph: 'e.g. 2021' },
+      { key: 'title',         label: 'Report Title',  ph: 'Italicised', full: 1 },
+      { key: 'report_number', label: 'Report Number', ph: 'e.g. 123' },
+      { key: 'institution',   label: 'Institution',   ph: 'e.g. WHO' },
+      { key: 'doi',           label: 'DOI',           ph: '10.xxxx/...' },
+      { key: 'url',           label: 'URL',           ph: 'https://...' },
+    ],
+    fn: d => bReport(d),
+  },
+  podcast_episode: {
+    host: true,
+    fields: [
+      { key: 'year',          label: 'Year',          ph: 'e.g. 2023' },
+      { key: 'month_day',     label: 'Month and Day', ph: 'e.g. June 4' },
+      { key: 'episode_title', label: 'Episode Title', ph: 'Sentence case', full: 1 },
+      { key: 'series_title',  label: 'Series / Show', ph: 'Show name', full: 1 },
+      { key: 'producer',      label: 'Producer',      ph: 'e.g. TED Audio Collective' },
+      { key: 'url',           label: 'URL',           ph: 'https://...' },
+    ],
+    fn: d => bPodcast(d),
+  },
+  video: {
+    authors: true,
+    fields: [
+      { key: 'year',      label: 'Year',        ph: 'e.g. 2022' },
+      { key: 'month_day', label: 'Month and Day', ph: 'e.g. April 3' },
+      { key: 'title',     label: 'Video Title', ph: 'Italicised', full: 1 },
+      { key: 'site_name', label: 'Platform',    ph: 'e.g. YouTube, Vimeo' },
+      { key: 'url',       label: 'URL',         ph: 'https://...' },
+    ],
+    fn: d => bVideo(d),
+  },
+  dissertation: {
+    authors: true,
+    fields: [
+      { key: 'year',        label: 'Year',        ph: 'e.g. 2021' },
+      { key: 'title',       label: 'Title',       ph: 'Dissertation title', full: 1 },
+      { key: 'degree_type', label: 'Degree Type', ph: 'e.g. Doctoral dissertation' },
+      { key: 'institution', label: 'Institution', ph: 'e.g. Stanford University' },
+      { key: 'database',    label: 'Database',    ph: 'e.g. ProQuest', full: 1 },
+      { key: 'url',         label: 'URL',         ph: 'https://...' },
+    ],
+    fn: d => bDiss(d),
+  },
+  conference_paper: {
+    authors: true,
+    fields: [
+      { key: 'year',       label: 'Year',        ph: 'e.g. 2022' },
+      { key: 'month_day',  label: 'Dates',       ph: 'e.g. Sept 12-15' },
+      { key: 'title',      label: 'Paper Title', ph: 'Sentence case', full: 1 },
+      { key: 'conference', label: 'Conference',  ph: 'Proceedings of ...', full: 1 },
+      { key: 'location',   label: 'Location',    ph: 'e.g. Dublin, Ireland' },
+      { key: 'doi',        label: 'DOI',         ph: '10.xxxx/...' },
+      { key: 'url',        label: 'URL',         ph: 'https://...' },
+    ],
+    fn: d => bConf(d),
+  },
+  magazine_article: {
+    authors: true,
+    fields: [
+      { key: 'year',      label: 'Year',          ph: 'e.g. 2023' },
+      { key: 'month_day', label: 'Month',         ph: 'e.g. April' },
+      { key: 'title',     label: 'Article Title', ph: 'Sentence case', full: 1 },
+      { key: 'magazine',  label: 'Magazine',      ph: 'e.g. Wired' },
+      { key: 'volume',    label: 'Volume',        ph: 'e.g. 31' },
+      { key: 'issue',     label: 'Issue',         ph: 'e.g. 4' },
+      { key: 'pages',     label: 'Pages',         ph: 'e.g. 54-61' },
+      { key: 'url',       label: 'URL',           ph: 'https://...' },
+    ],
+    fn: d => bMag(d),
+  },
+  social_media: {
+    authors: true,
+    fields: [
+      { key: 'year',      label: 'Year',                        ph: 'e.g. 2024' },
+      { key: 'month_day', label: 'Month and Day',               ph: 'e.g. January 14' },
+      { key: 'post_text', label: 'Post text (first 20 words)',  ph: 'Paste the beginning of the post...', full: 1 },
+      { key: 'platform',  label: 'Platform',                    ph: 'e.g. X, Instagram, Facebook, TikTok' },
+      { key: 'url',       label: 'Post URL',                    ph: 'https://...', full: 1 },
+    ],
+    fn: d => bSocial(d),
+  },
 };
 
-// ════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════
-
-let currentType  = ‘journal_article’;
-let currentType2 = ‘journal_article’;
+let currentType  = 'journal_article';
+let currentType2 = 'journal_article';
 let citHistory   = [];
 let annotHistory = [];
-let lastRaw      = ‘’;
-let lastAnnotRaw = ‘’;
-let lastAnnotTxt = ‘’;
-
-// ════════════════════════════════════════════════
-// TABS
-// ════════════════════════════════════════════════
+let lastRaw      = '';
+let lastAnnotRaw = '';
+let lastAnnotTxt = '';
 
 function switchTab(id, btn) {
-document.querySelectorAll(’.tab-panel’).forEach(p => p.classList.remove(‘active’));
-document.querySelectorAll(’.tab’).forEach(b => b.classList.remove(‘active’));
-document.getElementById(‘tab-’ + id).classList.add(‘active’);
-btn.classList.add(‘active’);
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
 }
-
-// ════════════════════════════════════════════════
-// TYPE GRIDS
-// ════════════════════════════════════════════════
 
 function buildTypeGrid(containerId, getActive, onSelect) {
-const g = document.getElementById(containerId);
-g.innerHTML = TYPES.map(t =>
-`<button class="type-btn${t.id === getActive() ? ' active' : ''}" data-id="${t.id}">${t.label}</button>`
-).join(’’);
-g.querySelectorAll(’.type-btn’).forEach(btn => {
-btn.addEventListener(‘click’, () => {
-g.querySelectorAll(’.type-btn’).forEach(b => b.classList.remove(‘active’));
-btn.classList.add(‘active’);
-onSelect(btn.dataset.id);
-});
-});
+  const g = document.getElementById(containerId);
+  g.innerHTML = TYPES.map(t =>
+    `<button class="type-btn${t.id === getActive() ? ' active' : ''}" data-id="${t.id}">${t.label}</button>`
+  ).join('');
+  g.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      g.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      onSelect(btn.dataset.id);
+    });
+  });
 }
-
-// ════════════════════════════════════════════════
-// FORM RENDERING
-// ════════════════════════════════════════════════
 
 function renderForm(cardId, typeId, px) {
-const schema = SCHEMAS[typeId];
-const card   = document.getElementById(cardId);
-let html = ‘’;
-
-if (schema.authors) {
-html += `<div class="section-label">Authors</div> <div class="author-list" id="${px}aList"></div> <button class="add-btn" onclick="addRow('${px}aList')">+ Add author</button> <hr class="divider"/>`;
-}
-if (schema.host) {
-html += `<div class="section-label">Host(s)</div> <div class="author-list" id="${px}hList"></div> <button class="add-btn" onclick="addRow('${px}hList')">+ Add host</button> <hr class="divider"/>`;
-}
-if (schema.editors) {
-html += `<div class="section-label">Editors <span style="font-style:italic;font-weight:400">(optional)</span></div> <div class="author-list" id="${px}eList"></div> <button class="add-btn" onclick="addRow('${px}eList')">+ Add editor</button> <hr class="divider"/>`;
-}
-
-html += `<div class="section-label">Details</div><div class="field-grid">`;
-for (const f of schema.fields) {
-html += `<div class="field${f.full ? ' full' : ''}"> <label>${f.label}</label> <input type="text" id="${px}f_${f.key}" placeholder="${f.ph}"/> </div>`;
-}
-html += `</div>`;
-
-if (px === ‘a_’) {
-html += `<button class="generate-btn" onclick="generate()">Generate Citation</button>`;
-}
-
-card.innerHTML = html;
-if (schema.authors) addRow(`${px}aList`);
-if (schema.host)    addRow(`${px}hList`);
+  const schema = SCHEMAS[typeId];
+  const card   = document.getElementById(cardId);
+  let html = '';
+  if (schema.authors) {
+    html += `<div class="section-label">Authors</div><div class="author-list" id="${px}aList"></div><button class="add-btn" onclick="addRow('${px}aList')">+ Add author</button><hr class="divider"/>`;
+  }
+  if (schema.host) {
+    html += `<div class="section-label">Host(s)</div><div class="author-list" id="${px}hList"></div><button class="add-btn" onclick="addRow('${px}hList')">+ Add host</button><hr class="divider"/>`;
+  }
+  if (schema.editors) {
+    html += `<div class="section-label">Editors <span style="font-style:italic;font-weight:400">(optional)</span></div><div class="author-list" id="${px}eList"></div><button class="add-btn" onclick="addRow('${px}eList')">+ Add editor</button><hr class="divider"/>`;
+  }
+  html += `<div class="section-label">Details</div><div class="field-grid">`;
+  for (const f of schema.fields) {
+    html += `<div class="field${f.full ? ' full' : ''}"><label>${f.label}</label><input type="text" id="${px}f_${f.key}" placeholder="${f.ph}"/></div>`;
+  }
+  html += `</div>`;
+  if (px === 'a_') {
+    html += `<button class="generate-btn" onclick="generate()">Generate Citation</button>`;
+  }
+  card.innerHTML = html;
+  if (schema.authors) addRow(`${px}aList`);
+  if (schema.host)    addRow(`${px}hList`);
 }
 
 function addRow(listId) {
-const list = document.getElementById(listId);
-if (!list) return;
-const d = document.createElement(‘div’);
-d.className = ‘author-row’;
-d.innerHTML = ` <input type="text" placeholder="Last name" class="al" style="padding:9px 12px;border:2px solid var(--rule);border-radius:var(--r);font-family:var(--body);font-size:14px;background:var(--bg);color:var(--ink);outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--rule)'"/> <input type="text" placeholder="First name(s)" class="af" style="padding:9px 12px;border:2px solid var(--rule);border-radius:var(--r);font-family:var(--body);font-size:14px;background:var(--bg);color:var(--ink);outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--rule)'"/> <button class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
-list.appendChild(d);
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const d = document.createElement('div');
+  d.className = 'author-row';
+  d.innerHTML = `<input type="text" placeholder="Last name" class="al" style="padding:9px 12px;border:2px solid var(--rule);border-radius:var(--r);font-family:var(--body);font-size:14px;background:var(--bg);color:var(--ink);outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--rule)'"/><input type="text" placeholder="First name(s)" class="af" style="padding:9px 12px;border:2px solid var(--rule);border-radius:var(--r);font-family:var(--body);font-size:14px;background:var(--bg);color:var(--ink);outline:none;width:100%;transition:border-color .15s" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--rule)'"/><button class="remove-btn" onclick="this.parentElement.remove()">x</button>`;
+  list.appendChild(d);
 }
 
 function collectPeople(listId) {
-const list = document.getElementById(listId);
-if (!list) return [];
-return Array.from(list.querySelectorAll(’.author-row’))
-.map(r => ({ last: r.querySelector(’.al’).value.trim() || null, first: r.querySelector(’.af’).value.trim() || null }))
-.filter(a => a.last || a.first);
+  const list = document.getElementById(listId);
+  if (!list) return [];
+  return Array.from(list.querySelectorAll('.author-row'))
+    .map(r => ({ last: r.querySelector('.al').value.trim() || null, first: r.querySelector('.af').value.trim() || null }))
+    .filter(a => a.last || a.first);
 }
 
 function getF(id) { const e = document.getElementById(id); return e ? e.value.trim() || null : null; }
 
 function collectData(px, typeId) {
-const s = SCHEMAS[typeId]; const d = {};
-if (s.authors) d.authors = collectPeople(`${px}aList`);
-if (s.host)    d.host    = collectPeople(`${px}hList`);
-if (s.editors) d.editors = collectPeople(`${px}eList`);
-for (const f of s.fields) d[f.key] = getF(`${px}f_${f.key}`);
-return d;
+  const s = SCHEMAS[typeId]; const d = {};
+  if (s.authors) d.authors = collectPeople(`${px}aList`);
+  if (s.host)    d.host    = collectPeople(`${px}hList`);
+  if (s.editors) d.editors = collectPeople(`${px}eList`);
+  for (const f of s.fields) d[f.key] = getF(`${px}f_${f.key}`);
+  return d;
 }
-
-// ════════════════════════════════════════════════
-// CITATIONS — GENERATE / HISTORY
-// ════════════════════════════════════════════════
 
 function generate() {
-const data = collectData(‘a_’, currentType);
-const raw  = SCHEMAS[currentType].fn(data);
-lastRaw = raw;
-
-document.getElementById(‘citationBox’).innerHTML = renderI(raw);
-document.getElementById(‘outputWrap’).classList.add(‘visible’);
-document.getElementById(‘outputWrap’).scrollIntoView({ behavior: ‘smooth’, block: ‘nearest’ });
-
-const lbl = TYPES.find(t => t.id === currentType)?.label || currentType;
-citHistory.unshift({ type: lbl, raw, rendered: renderI(raw) });
-if (citHistory.length > 50) citHistory.pop();
-renderCitHistory();
-
-const b = document.getElementById(‘copyBtn’);
-b.textContent = ‘Copy’; b.classList.remove(‘copied’);
+  const data = collectData('a_', currentType);
+  const raw  = SCHEMAS[currentType].fn(data);
+  lastRaw = raw;
+  document.getElementById('citationBox').innerHTML = renderI(raw);
+  document.getElementById('outputWrap').classList.add('visible');
+  document.getElementById('outputWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const lbl = TYPES.find(t => t.id === currentType)?.label || currentType;
+  citHistory.unshift({ type: lbl, raw, rendered: renderI(raw) });
+  if (citHistory.length > 50) citHistory.pop();
+  renderCitHistory();
+  const b = document.getElementById('copyBtn');
+  b.textContent = 'Copy'; b.classList.remove('copied');
 }
 
-const renderI = s => s.replace(/_I_(.*?)_I_/g, ‘<em>$1</em>’);
-const plain   = s => s.replace(/_I_(.*?)_I_/g, ‘$1’);
+const renderI = s => s.replace(/__I__(.*?)__I__/g, '<em>$1</em>');
+const plain   = s => s.replace(/__I__(.*?)__I__/g, '$1');
 
 function copyCitation() {
-navigator.clipboard.writeText(plain(lastRaw)).then(() => {
-const b = document.getElementById(‘copyBtn’);
-b.textContent = ‘Copied!’; b.classList.add(‘copied’);
-setTimeout(() => { b.textContent = ‘Copy’; b.classList.remove(‘copied’); }, 2000);
-});
+  navigator.clipboard.writeText(plain(lastRaw)).then(() => {
+    const b = document.getElementById('copyBtn');
+    b.textContent = 'Copied!'; b.classList.add('copied');
+    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('copied'); }, 2000);
+  });
 }
 
 function deleteItem(i) { citHistory.splice(i, 1); renderCitHistory(); }
 function clearHistory() { citHistory = []; renderCitHistory(); }
 
 function renderCitHistory() {
-const list = document.getElementById(‘historyList’);
-document.getElementById(‘historyBadge’).textContent = citHistory.length;
-if (!citHistory.length) {
-list.innerHTML = ‘<div class="empty-history">No citations yet — generate one above.</div>’; return;
+  const list = document.getElementById('historyList');
+  document.getElementById('historyBadge').textContent = citHistory.length;
+  if (!citHistory.length) {
+    list.innerHTML = '<div class="empty-history">No citations yet - generate one above.</div>'; return;
+  }
+  list.innerHTML = citHistory.map((item, i) => `<div class="history-item"><div><div class="history-type">${item.type}</div><div class="history-text">${item.rendered}</div></div><div class="history-actions"><button class="history-copy" onclick="navigator.clipboard.writeText(plain(citHistory[${i}].raw))">Copy</button><button class="history-delete" onclick="deleteItem(${i})">Delete</button></div></div>`).join('');
 }
-list.innerHTML = citHistory.map((item, i) => ` <div class="history-item"> <div> <div class="history-type">${item.type}</div> <div class="history-text">${item.rendered}</div> </div> <div class="history-actions"> <button class="history-copy"   onclick="navigator.clipboard.writeText(plain(citHistory[${i}].raw))">Copy</button> <button class="history-delete" onclick="deleteItem(${i})">Delete</button> </div> </div>`).join(’’);
-}
-
-// ════════════════════════════════════════════════
-// ANNOTATED — GENERATE / HISTORY
-// ════════════════════════════════════════════════
 
 function updateCC(taId, ccId, max) {
-const len = document.getElementById(taId).value.trim().length;
-const el  = document.getElementById(ccId);
-el.textContent = `${len} / ${max} chars recommended`;
-el.classList.toggle(‘over’, len > max);
+  const len = document.getElementById(taId).value.trim().length;
+  const el  = document.getElementById(ccId);
+  el.textContent = `${len} / ${max} chars recommended`;
+  el.classList.toggle('over', len > max);
 }
 
 function generateAnnotated() {
-const data  = collectData(‘b_’, currentType2);
-const raw   = SCHEMAS[currentType2].fn(data);
-lastAnnotRaw = raw;
-
-const sum = document.getElementById(‘annot_summary’).value.trim();
-const ev  = document.getElementById(‘annot_eval’).value.trim();
-const ref = document.getElementById(‘annot_refl’).value.trim();
-lastAnnotTxt = [sum, ev, ref].filter(Boolean).join(’ ’);
-
-const box = document.getElementById(‘annotOutputBox’);
-box.innerHTML = `<span>${renderI(raw)}</span>` +
-(lastAnnotTxt ? `<span class="annot-annotation">${lastAnnotTxt}</span>` : ‘’);
-
-document.getElementById(‘annotOutputWrap’).classList.add(‘visible’);
-document.getElementById(‘annotOutputWrap’).scrollIntoView({ behavior: ‘smooth’, block: ‘nearest’ });
-
-const lbl = TYPES.find(t => t.id === currentType2)?.label || currentType2;
-annotHistory.unshift({ type: lbl, raw, rendered: renderI(raw), annotation: lastAnnotTxt });
-if (annotHistory.length > 50) annotHistory.pop();
-renderAnnotHistory();
-
-const b = document.getElementById(‘annotCopyBtn’);
-b.textContent = ‘Copy’; b.classList.remove(‘copied’);
+  const data = collectData('b_', currentType2);
+  const raw  = SCHEMAS[currentType2].fn(data);
+  lastAnnotRaw = raw;
+  const sum = document.getElementById('annot_summary').value.trim();
+  const ev  = document.getElementById('annot_eval').value.trim();
+  const ref = document.getElementById('annot_refl').value.trim();
+  lastAnnotTxt = [sum, ev, ref].filter(Boolean).join(' ');
+  const box = document.getElementById('annotOutputBox');
+  box.innerHTML = `<span>${renderI(raw)}</span>` + (lastAnnotTxt ? `<span class="annot-annotation">${lastAnnotTxt}</span>` : '');
+  document.getElementById('annotOutputWrap').classList.add('visible');
+  document.getElementById('annotOutputWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const lbl = TYPES.find(t => t.id === currentType2)?.label || currentType2;
+  annotHistory.unshift({ type: lbl, raw, rendered: renderI(raw), annotation: lastAnnotTxt });
+  if (annotHistory.length > 50) annotHistory.pop();
+  renderAnnotHistory();
+  const b = document.getElementById('annotCopyBtn');
+  b.textContent = 'Copy'; b.classList.remove('copied');
 }
 
 function copyAnnotated() {
-const txt = plain(lastAnnotRaw) + (lastAnnotTxt ? ’\n\n    ’ + lastAnnotTxt : ‘’);
-navigator.clipboard.writeText(txt).then(() => {
-const b = document.getElementById(‘annotCopyBtn’);
-b.textContent = ‘Copied!’; b.classList.add(‘copied’);
-setTimeout(() => { b.textContent = ‘Copy’; b.classList.remove(‘copied’); }, 2000);
-});
+  const txt = plain(lastAnnotRaw) + (lastAnnotTxt ? '\n\n    ' + lastAnnotTxt : '');
+  navigator.clipboard.writeText(txt).then(() => {
+    const b = document.getElementById('annotCopyBtn');
+    b.textContent = 'Copied!'; b.classList.add('copied');
+    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('copied'); }, 2000);
+  });
 }
 
 function deleteAnnotItem(i) { annotHistory.splice(i, 1); renderAnnotHistory(); }
 function clearAnnotHistory() { annotHistory = []; renderAnnotHistory(); }
 
 function renderAnnotHistory() {
-const list = document.getElementById(‘annotHistoryList’);
-document.getElementById(‘annotBadge’).textContent = annotHistory.length;
-if (!annotHistory.length) {
-list.innerHTML = ‘<div class="empty-history">No annotated entries yet.</div>’; return;
+  const list = document.getElementById('annotHistoryList');
+  document.getElementById('annotBadge').textContent = annotHistory.length;
+  if (!annotHistory.length) {
+    list.innerHTML = '<div class="empty-history">No annotated entries yet.</div>'; return;
+  }
+  list.innerHTML = annotHistory.map((item, i) => `<div class="annot-history-item"><div class="annot-history-type">${item.type}</div><div class="annot-history-citation">${item.rendered}</div>${item.annotation ? `<div class="annot-history-annotation">${item.annotation}</div>` : ''}<div class="annot-history-actions"><button class="history-copy" onclick="(() => { const t = plain(annotHistory[${i}].raw) + (annotHistory[${i}].annotation ? '\n\n    ' + annotHistory[${i}].annotation : ''); navigator.clipboard.writeText(t); })()">Copy</button><button class="history-delete" onclick="deleteAnnotItem(${i})">Delete</button></div></div>`).join('');
 }
-list.innerHTML = annotHistory.map((item, i) => `<div class="annot-history-item"> <div class="annot-history-type">${item.type}</div> <div class="annot-history-citation">${item.rendered}</div> ${item.annotation ?`<div class="annot-history-annotation">${item.annotation}</div>` : ''} <div class="annot-history-actions"> <button class="history-copy" onclick="(() => { const t = plain(annotHistory[${i}].raw) + (annotHistory[${i}].annotation ? '\\n\\n    ' + annotHistory[${i}].annotation : ''); navigator.clipboard.writeText(t); })()">Copy</button> <button class="history-delete" onclick="deleteAnnotItem(${i})">Delete</button> </div> </div>`).join(’’);
-}
-
-// ════════════════════════════════════════════════
-// RULES PANEL TOGGLE
-// ════════════════════════════════════════════════
 
 function togglePanel(panelId, btnId) {
-const p = document.getElementById(panelId);
-const b = document.getElementById(btnId);
-const open = p.classList.toggle(‘open’);
-b.textContent = (open ? ‘▾’ : ‘▸’) + ’ Null-handling rules’;
+  const p = document.getElementById(panelId);
+  const b = document.getElementById(btnId);
+  const open = p.classList.toggle('open');
+  b.textContent = (open ? '\u25be' : '\u25b8') + ' Null-handling rules';
 }
 
-// ════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════
-
-buildTypeGrid(‘typeGrid’, () => currentType, id => {
-currentType = id;
-renderForm(‘formCard’, currentType, ‘a_’);
-document.getElementById(‘outputWrap’).classList.remove(‘visible’);
+buildTypeGrid('typeGrid', () => currentType, id => {
+  currentType = id;
+  renderForm('formCard', currentType, 'a_');
+  document.getElementById('outputWrap').classList.remove('visible');
 });
 
-buildTypeGrid(‘typeGrid2’, () => currentType2, id => {
-currentType2 = id;
-renderForm(‘formCard2’, currentType2, ‘b_’);
+buildTypeGrid('typeGrid2', () => currentType2, id => {
+  currentType2 = id;
+  renderForm('formCard2', currentType2, 'b_');
 });
 
-renderForm(‘formCard’,  currentType,  ‘a_’);
-renderForm(‘formCard2’, currentType2, ‘b_’);
+renderForm('formCard',  currentType,  'a_');
+renderForm('formCard2', currentType2, 'b_');
 renderCitHistory();
 renderAnnotHistory();
+
 </script>
 
 </body>
